@@ -15,6 +15,8 @@ It uses a special message text (#bot_text) from a modified slackbot base that ca
 other bots.
 
 A couple times it has to use the slacker API directly to do more advanced operations.
+
+Doc strings for methods with @respond_to will look odd because they are exposed by the bot to slack.
 """
 
 
@@ -24,6 +26,9 @@ cache = {}
 
 @respond_to('add (branch|mention) (.*)')
 def add_actions(message, action, target):
+    """
+    Add subscriptions of a branch or mention.  i.e. add mention username
+    """
     """
     Add subscriptions of a branch or mention for the requesting user.  Reply to the user informing what they requested.
     :param message: message body that holds things like the user and how to reply
@@ -53,6 +58,9 @@ def add_actions(message, action, target):
 @respond_to('list (all|branch|mention)')
 def list_actions(message, action):
     """
+    List stored details for a user.  i.e. list mention
+    """
+    """
     List available values for a requesting user.  Options are everything about the user, branch subscriptions, and
     mention subscriptions.  Reply with the values.
     :param message: message body that holds things like the user and how to reply
@@ -76,6 +84,9 @@ def list_actions(message, action):
 
 @respond_to('remove (branch|mention) (.*)')
 def remove_actions(message, action, target):
+    """
+    Remove subscriptions of a branch or mention.  i.e. remove mention username
+    """
     """
     Remove subscriptions of a branch or mention for the requesting user.  Reply to the user informing what they
     requested.
@@ -119,7 +130,7 @@ def github_mentions(message):
     Super special listener for github message processing.
     :param message: message body that contains all the info
     """
-    print(message.body.keys())
+    #print(message.body.keys())
     # get the message text so we can process it for subscriptions
     attachments = message.body['attachments'][0]
     text = attachments.get('text', '')
@@ -135,12 +146,18 @@ def github_mentions(message):
         branches = subs['branch']
 
         # super hacky way to only look at comments
-        if 'Comment by' in title:
+        if 'comment by' in title.lower():
             for m in mentions:
                 if m in text:
                     slack.chat.post_message('@' + user,
                                             'Mention match!\n' + format_message(attachments),
-                                            'github')
+                                            settings.BOT_NAME,
+                                            settings.BOT_NAME,
+                                            None,
+                                            None,
+                                            None,
+                                            False,
+                                            False)
                     break  # only notify once per user
 
         for b in branches:
