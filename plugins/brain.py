@@ -38,18 +38,18 @@ def add_actions(message, action, target):
     username = get_username(message)
     subs = load_user(username)
 
-    if subs:
-        try:
-            my_set = set(subs[action])
-            my_set.add(target)
-            subs[action] = list(my_set)
-        except KeyError:
-            my_set = set()
-            my_set.add(target)
-            subs[action] = list(my_set)
-    else:
-        # subs = {'user': username, action: [target], 'enabled': True}
-        subs = {action: [target], 'enabled': True}
+    # if the user does not exist then create the subscription template
+    if not subs:
+        subs = {'mention': [], 'branch': [], 'enabled': True}
+
+    try:
+        my_set = set(subs[action])
+        my_set.add(target)
+        subs[action] = list(my_set)
+    except KeyError:
+        my_set = set()
+        my_set.add(target)
+        subs[action] = list(my_set)
 
     save_user(subs, username)
     message.reply('Subscribed to ' + action + ' [*' + target + '*]')
@@ -135,7 +135,8 @@ def github_mentions(message):
     attachments = message.body['attachments'][0]
     text = attachments.get('text', '')
     title = attachments.get('title', '')
-    print(json.dumps(attachments))
+    pretext = attachments.get('pretext', '')
+    #print(json.dumps(attachments))
 
     if cache == {}:
         populate_cache()
@@ -146,7 +147,7 @@ def github_mentions(message):
         branches = subs['branch']
 
         # super hacky way to only look at comments
-        if 'comment by' in title.lower():
+        if 'comment by' in pretext.lower() or 'pull request submitted by' in pretext.lower():
             for m in mentions:
                 if m in text:
                     slack.chat.post_message('@' + user,
@@ -240,7 +241,10 @@ def load_user(user):
     if cache == {}:
         populate_cache()
 
-    return cache[user]
+    try:
+        return cache[user]
+    except KeyError:
+        pass
 
 
 def load_user_from_file(user):
@@ -261,9 +265,16 @@ def load_user_from_file(user):
         pass
 
 
-def list_users():
-    homedir = os.path.dirname(os.path.realpath(sys.argv[0]))
-    return next(os.walk(homedir + '/data/'))[2]
+def list_users(path):
+    """
+    Get the list of users being maintained by the bot
+    :param path: path to search for users
+    :return: list of usernames
+    """
+    if not os.listdir(path):
+        return next(os.walk(path))[2]
+    else:
+        return []
 
 
 def populate_cache():
@@ -272,7 +283,7 @@ def populate_cache():
     """
     path = os.path.dirname(os.path.realpath(sys.argv[0])) + '/data/'
     # paths = [os.path.join(path, fn) for fn in next(os.walk(path))[2]]
-    usernames = next(os.walk(path))[2]
+    usernames = list_users(path)
 
     for username in usernames:
         with open(path + username, 'r+') as f:
