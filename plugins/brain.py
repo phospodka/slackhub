@@ -287,6 +287,7 @@ def populate_cache():
     Walk the persistent file directory and populate the cache
     """
     path = os.path.dirname(os.path.realpath(sys.argv[0])) + '/data/'
+    os.makedirs(path, exist_ok=True)
     # paths = [os.path.join(path, fn) for fn in next(os.walk(path))[2]]
     usernames = list_users(path)
 

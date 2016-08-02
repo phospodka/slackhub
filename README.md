@@ -4,6 +4,9 @@ Slackhub
 Slackhub is a Github integration for slack that aims to provide direct notification for keyword matching and branch
 updates.  This is done by messaging the bot commands to manage subscriptions to keywords or full branch names.  
 
+Dependencies
+------------------------
+
 Relies heavily on [slacker](https://github.com/os/slacker) and [slackbot](https://github.com/lins05/slackbot) Python 
 projects.
 
@@ -11,6 +14,8 @@ Currently needs my fork of [slackbot](https://github.com/phospodka/slackbot) to 
 This is a temporary measure until I get the web hook processing complete.  After downloading run:
 
 `pip install -e {location of download}`
+
+Everything is tested using Python version 3.4
 
 Usage
 ------------------------
