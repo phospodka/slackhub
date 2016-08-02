@@ -10,9 +10,9 @@ from slacker import Slacker
 slack = Slacker(settings.API_TOKEN)
 
 """
-This is the brain of the slackhub bot.  It does all the subscription management and listening to messages.
-It uses a special message text (#bot_text) from a modified slackbot base that can work with messages from
-other bots.
+This is the brain of the slackhub bot.  It does all the subscription management and listening to
+messages.  It uses a special message text (#bot_text) from a modified slackbot base that can work
+with messages from other bots.
 
 A couple times it has to use the slacker API directly to do more advanced operations.
 
@@ -27,10 +27,11 @@ cache = {}
 @respond_to('add (branch|mention) (.*)')
 def add_actions(message, action, target):
     """
-    Add subscriptions of a branch or mention.  i.e. add mention username
+    Add subscriptions of a branch or mention.  Only mention is currently functional i.e. `add mention username`
     """
     """
-    Add subscriptions of a branch or mention for the requesting user.  Reply to the user informing what they requested.
+    Add subscriptions of a branch or mention for the requesting user.  Reply to the user informing
+    what they requested.
     :param message: message body that holds things like the user and how to reply
     :param action: type of subscription to add (branch or mention)
     :param target: text that represents what to subscribe to
@@ -58,11 +59,11 @@ def add_actions(message, action, target):
 @respond_to('list (all|branch|mention)')
 def list_actions(message, action):
     """
-    List stored details for a user.  i.e. list mention
+    List stored details for a user.  i.e. `list mention`
     """
     """
-    List available values for a requesting user.  Options are everything about the user, branch subscriptions, and
-    mention subscriptions.  Reply with the values.
+    List available values for a requesting user.  Options are everything about the user, branch
+    subscriptions, and mention subscriptions.  Reply with the values.
     :param message: message body that holds things like the user and how to reply
     :param action: what type of information to list
     """
@@ -85,11 +86,11 @@ def list_actions(message, action):
 @respond_to('remove (branch|mention) (.*)')
 def remove_actions(message, action, target):
     """
-    Remove subscriptions of a branch or mention.  i.e. remove mention username
+    Remove subscriptions of a branch or mention.  i.e. `remove mention username`
     """
     """
-    Remove subscriptions of a branch or mention for the requesting user.  Reply to the user informing what they
-    requested.
+    Remove subscriptions of a branch or mention for the requesting user.  Reply to the user
+    informing what they requested.
     :param message: message body that holds things like the user and how to reply
     :param action: type of subscription to remove (branch or mention)
     :param target: text that represents what to unsubscribe from
@@ -134,7 +135,7 @@ def github_mentions(message):
     # get the message text so we can process it for subscriptions
     attachments = message.body['attachments'][0]
     text = attachments.get('text', '')
-    title = attachments.get('title', '')
+    #title = attachments.get('title', '')
     pretext = attachments.get('pretext', '')
     #print(json.dumps(attachments))
 
@@ -184,6 +185,7 @@ def format_message(message):
     # return message['pretext'] + '\n' + '> ' + bold_title(message['title']) + '> ' + message['text']
     pretext = message.get('pretext', None)
     title = message.get('title', None)
+    title_link = message.get('title_link', None)
     text = message.get('text', None)
 
     reply = ''
@@ -192,7 +194,10 @@ def format_message(message):
         reply += pretext + '\n'
 
     if title is not None:
-        reply += '> ' + bold_title(title)
+        if title_link is not None:
+            reply += '> ' + '<' + title_link + '|' + title + '>' + '\n'
+        else:
+            reply += '> ' + bold_title(title)
 
     if text is not None:
         reply += '> ' + text
@@ -271,7 +276,7 @@ def list_users(path):
     :param path: path to search for users
     :return: list of usernames
     """
-    if not os.listdir(path):
+    if os.listdir(path):
         return next(os.walk(path))[2]
     else:
         return []

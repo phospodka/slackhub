@@ -7,6 +7,11 @@ updates.  This is done by messaging the bot commands to manage subscriptions to 
 Relies heavily on [slacker](https://github.com/os/slacker) and [slackbot](https://github.com/lins05/slackbot) Python 
 projects.
 
+Currently needs my fork of [slackbot](https://github.com/phospodka/slackbot) to handle processing messages from bots.
+This is a temporary measure until I get the web hook processing complete.  After downloading run:
+
+`pip install -e {location of download}`
+
 Usage
 ------------------------
 
@@ -43,6 +48,7 @@ There are a number of items I'd like to do.
 * add enabled disable support for the user
 * finish branch subscription functionality
 * add any missing support for mentions
-* figure out how to have the bot pm you, not from slackbot; there has to be a way
 * add some sort of logging
+* add web hook processing instead of relying on channel scraping (maybe keep as a fallback)
 * tests ;_;
+* figure out how to make this installable
