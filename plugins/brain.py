@@ -134,9 +134,9 @@ def github_mentions(message):
     #print(message.body.keys())
     # get the message text so we can process it for subscriptions
     attachments = message.body['attachments'][0]
-    text = attachments.get('text', '')
+    text = attachments.get('text', '').lower()
     #title = attachments.get('title', '')
-    pretext = attachments.get('pretext', '')
+    pretext = attachments.get('pretext', '').lower()
     #print(json.dumps(attachments))
 
     if cache == {}:
@@ -148,11 +148,11 @@ def github_mentions(message):
         branches = subs['branch']
 
         # super hacky way to only look at comments
-        if 'comment by' in pretext.lower() or 'pull request submitted by' in pretext.lower():
+        if 'comment by' in pretext or 'pull request submitted by' in pretext:
             for m in mentions:
-                if m in text:
+                if m.lower() in text:
                     slack.chat.post_message('@' + user,
-                                            'Mention match!\n' + format_message(attachments),
+                                            format_message(attachments),  # add something about what rule matched
                                             settings.BOT_NAME,
                                             settings.BOT_NAME,
                                             None,
