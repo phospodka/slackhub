@@ -148,7 +148,9 @@ def github_mentions(message):
         branches = subs['branch']
 
         # super hacky way to only look at comments
-        if 'comment by' in pretext or 'pull request submitted by' in pretext:
+        if 'new comment by' in pretext \
+                or 'new comment on' in pretext \
+                or 'pull request submitted by' in pretext:
             for m in mentions:
                 if m.lower() in text:
                     slack.chat.post_message('@' + user,
