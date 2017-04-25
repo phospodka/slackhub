@@ -133,39 +133,45 @@ def github_mentions(message):
     """
     #print(message.body.keys())
     # get the message text so we can process it for subscriptions
-    attachments = message.body['attachments'][0]
-    text = attachments.get('text', '').lower()
-    #title = attachments.get('title', '')
-    pretext = attachments.get('pretext', '').lower()
-    #print(json.dumps(attachments))
+    attachments = message.body['attachments']
 
-    if cache == {}:
-        populate_cache()
+    for attachment in attachments:
+        text = attachment.get('text', '').lower()
+        #title = attachments.get('title', '')
+        pretext = attachment.get('pretext', '').lower()
+        footer = attachment.get('footer', '').lower()
+        #print(json.dumps(attachment))
 
-    # process message text against all subscriptions
-    for user, subs in cache.items():
-        mentions = subs['mention']
-        branches = subs['branch']
+        if cache == {}:
+            populate_cache()
 
-        # super hacky way to only look at comments
-        if 'new comment by' in pretext \
-                or 'new comment on' in pretext \
-                or 'pull request submitted by' in pretext:
-            for m in mentions:
-                if m.lower() in text:
-                    slack.chat.post_message('@' + user,
-                                            format_message(attachments),  # add something about what rule matched
-                                            settings.BOT_NAME,
-                                            settings.BOT_NAME,
-                                            None,
-                                            None,
-                                            None,
-                                            False,
-                                            False)
-                    break  # only notify once per user
+        # process message text against all subscriptions
+        for user, subs in cache.items():
+            mentions = subs['mention']
+            branches = subs['branch']
 
-        for b in branches:
-            pass
+            # super hacky way to only look at comments
+            # missing the review summary message as it does not mark itself
+            # may have to abandon this filtering and just always peek in 'text'
+            if 'new comment by' in pretext \
+                    or 'new comment on' in pretext \
+                    or 'pull request submitted by' in pretext\
+                    or 'comment by' in footer:
+                for m in mentions:
+                    if m.lower() in text:
+                        slack.chat.post_message('@' + user,                   # channel
+                                                format_message(attachment),  # text
+                                                settings.BOT_NAME,            # username
+                                                settings.BOT_NAME,            # as user
+                                                None,                         # parse
+                                                None,                         # link names
+                                                None,                         # attachments
+                                                False,                        # unfurl links
+                                                False)                        # unfurl media
+                        break  # only notify once per user
+
+            for b in branches:
+                pass
 
 
 def get_username(msg):
@@ -189,6 +195,7 @@ def format_message(message):
     title = message.get('title', None)
     title_link = message.get('title_link', None)
     text = message.get('text', None)
+    footer = message.get('footer', None)
 
     reply = ''
 
@@ -203,6 +210,9 @@ def format_message(message):
 
     if text is not None:
         reply += '> ' + text
+
+    if footer is not None:
+        reply += '\n' + '> ' + footer
 
     return reply
 
