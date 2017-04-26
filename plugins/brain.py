@@ -110,27 +110,17 @@ def remove_actions(message, action, target):
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*]')
 
 
-@listen_to('boop')
-def listen(message):
-    if cache == {}:
-        populate_cache()
-
-    for key, value in cache.items():
-        print(key + ' ' + str(value))
-
-    # print message.body['text']
-    print(message.body.keys())
-    slack.chat.post_message('@phospodka',
-                            'Beep ' + message.body['text'],
-                            'boop-bot')
-
-
 @listen_to('#bot_text')
 def github_mentions(message):
     """
     Super special listener for github message processing.
     :param message: message body that contains all the info
     """
+    # listen to all, but then filter on if the message is a bot message? it is part of that message
+    # message.body.subtype = 'bot_message'
+    # message.body.bot_id = 'the bots id'
+    # message.body.type = 'message'
+    # then maybe could display exact text?
     #print(message.body.keys())
     # get the message text so we can process it for subscriptions
     attachments = message.body['attachments']
@@ -160,7 +150,7 @@ def github_mentions(message):
                 for m in mentions:
                     if m.lower() in text:
                         slack.chat.post_message('@' + user,                   # channel
-                                                format_message(attachment),  # text
+                                                format_message(attachment),   # text
                                                 settings.BOT_NAME,            # username
                                                 settings.BOT_NAME,            # as user
                                                 None,                         # parse
