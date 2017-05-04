@@ -1,6 +1,6 @@
 from slackbot.bot import listen_to
 from slackhub.dispatcher import post_message
-from slackhub.slackhubbot import get_cache
+from slackhub.persister import get_cache
 
 """
 Handles channel listening.

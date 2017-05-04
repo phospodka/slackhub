@@ -2,8 +2,8 @@ import json
 
 from slackbot.bot import respond_to
 from slackhub.slackhubbot import get_username
-from slackhub.slackhubbot import load_user
-from slackhub.slackhubbot import save_user
+from slackhub.persister import load_user
+from slackhub.persister import save_user
 
 """
 Handles user configuration of notifications.
@@ -54,7 +54,7 @@ def list_actions(message, action):
     :param action: what type of information to list
     """
     username = get_username(message)
-    data = None  # ''
+    data = None
 
     try:
         if action == 'all':

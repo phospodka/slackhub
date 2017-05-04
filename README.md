@@ -10,6 +10,10 @@ Dependencies
 Relies heavily on [slacker](https://github.com/os/slacker) and [slackbot](https://github.com/lins05/slackbot) Python 
 projects.
 
+Install the main requirements with:
+
+`pip install -r requirements.txt`
+
 Currently needs my fork of [slackbot](https://github.com/phospodka/slackbot) to handle processing messages from bots.
 This is a temporary measure until I get the web hook processing complete.  After downloading run:
 
