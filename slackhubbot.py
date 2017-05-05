@@ -58,18 +58,20 @@ def main():
 
 
 def slackbot_init():
+    logger.info('Initializing slackbot')
     bot = Bot()
     bot.run()
 
 
 def webhook_init():
-    app.run(host= '0.0.0.0')
+    logger.info('Initializing flask')
+    app.run(host='0.0.0.0')
 
 
 @app.route("/", methods=['GET', 'POST'])
 def webhook_sink():
     # needs to handle trusted listening to known hosts and maybe just POST
-    github_router(json.loads(request.data.decode("utf-8")))
+    github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
     return "OK"
 
 
