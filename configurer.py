@@ -27,7 +27,7 @@ def add_actions(message, action, target):
 
     # if the user does not exist then create the subscription template
     if not subs:
-        subs = {'mention': [], 'branch': [], 'enabled': True}
+        subs = {'mention': [], 'branch': [], 'label': [], 'enabled': True, 'type': 'user'}
 
     try:
         my_set = set(subs[action])

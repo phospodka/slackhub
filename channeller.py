@@ -33,9 +33,10 @@ def github_listener(message):
             #print(json.dumps(attachment))
 
             # process message text against all subscriptions
-            for user, subs in get_cache().items():
-                mentions = subs['mention']
-                branches = subs['branch']
+            for user, details in get_cache().items():
+                mentions = details['mention']
+                branches = details['branch']
+                usertype = details['type']
 
                 # super hacky way to only look at comments
                 # missing the review summary message as it does not mark itself
@@ -46,7 +47,7 @@ def github_listener(message):
                         or 'comment by' in footer:
                     for m in mentions:
                         if m.lower() in text:
-                            post_message(user, attachment)
+                            post_message(user, usertype, attachment)
                             break  # only notify once per user
 
                 for b in branches:

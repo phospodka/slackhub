@@ -6,13 +6,15 @@ Handles message posting to slack.
 """
 
 
-def post_message(user, attachment):
+def post_message(channel, usertype, attachment):
     """
     Post the message based off the attachment to user in slack.
-    :param user: user who should receive the message
+    :param channel: user who should receive the message
+    :param usertype: type of user to send to
     :param attachment: object that holds the parts of the message
     """
-    slack.chat.post_message('@' + user,                   # channel / user to message
+    channel = '@' + channel if usertype == 'user' else channel  # maybe externalise this logic
+    slack.chat.post_message(channel,                      # channel / user to message
                             format_message(attachment),   # text to send
                             settings.BOT_NAME,            # username to reply as
                             settings.BOT_NAME,            # as user to masquerade as

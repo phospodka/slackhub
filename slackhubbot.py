@@ -3,12 +3,13 @@ import logging.config
 import json
 import sys
 import threading
+import slackhub.webhooker   # need to fix circular dependency
 
 from flask import Flask, request
 from slackbot import settings
 from slackbot.bot import Bot
 from slacker import Slacker
-from slackhub.webhooker import github_router
+#from slackhub.webhooker import github_router
 
 # hack for now to include slackhub as a module until I get the egg link working
 sys.path.append('..')
@@ -71,7 +72,7 @@ def webhook_init():
 @app.route("/", methods=['GET', 'POST'])
 def webhook_sink():
     # needs to handle trusted listening to known hosts and maybe just POST
-    github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
+    slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
     return "OK"
 
 
