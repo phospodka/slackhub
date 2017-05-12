@@ -47,7 +47,7 @@ def github_listener(message):
                         or 'comment by' in footer:
                     for m in mentions:
                         if m.lower() in text:
-                            post_message(user, usertype, attachment)
+                            post_message(user, usertype, [attachment])
                             break  # only notify once per user
 
                 for b in branches:
