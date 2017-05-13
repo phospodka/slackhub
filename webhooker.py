@@ -12,6 +12,11 @@ Handles webhook requests.
 
 
 def github_router(event, message):
+    """
+    Route a Github web hook to the proper processing place.
+    :param event: String type of Github event
+    :param message: Json message body from web hook
+    """
     '''
     known events -> actions:
         pull_request
@@ -45,14 +50,21 @@ def github_router(event, message):
             _comment_created(message)
     elif event == 'pull_request':
         if action == 'labeled':
-            _labeling(message)
+            _labeled(message)
     elif event == 'pull_request_review':
-        pass
+        if action == 'submitted':
+            _pr_review_submitted(message)
     elif event == 'pull_request_review_comment':
-        pass
+        if action == 'created':
+            _pr_review_comment_created(message)
 
 
 def _comment_created(message):
+    """
+    Handle processing of pull request / issue comment creation. They are apparently the same in
+    Github's eyes.
+    :param message: web hook json message from Github
+    """
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
         mentions = details['mention']
@@ -81,7 +93,12 @@ def _comment_created(message):
                 }])
                 break  # only notify once per user
 
-def _labeling(message):
+
+def _labeled(message):
+    """
+    Handle label processing.  Intended to notify a channel based on a label add
+    :param message: web hook json message from Github
+    """
     label = message.get('label').get('name')
     print('labeled: ' + label)
 
@@ -116,3 +133,56 @@ def _labeling(message):
                 break  # maybe combine all labels matched if we are returning it? or maybe just not say
 
 
+def _pr_review_submitted(message): # should change
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+        mentions = details['mention']
+
+        for m in mentions:
+            if m.lower() in message.get('review').get('body'):
+                slackhub.dispatcher.post_message(user, usertype, [{
+                    'fallback': "Required plain-text summary of the attachment.",
+                    'color': 'C4E8B4',
+                    'pretext': '<'
+                               + message.get('repository').get('html_url')
+                               + '|['
+                               + message.get('repository').get('name')
+                               + ']> Review submitted by <'
+                               + message.get('review').get('user').get('url')
+                               + '|'
+                               + message.get('review').get('user').get('login')
+                               + '> on pull request <'
+                               + message.get('pull_request').get('html_url')
+                               + '|#'
+                               + str(message.get('pull_request').get('number'))
+                               + ' '
+                               + message.get('pull_request').get('title')
+                               + '>',
+                    'text': message.get('review').get('body')
+                }])
+                break  # only notify once per user
+
+
+def _pr_review_comment_created(message):
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+        mentions = details['mention']
+
+        for m in mentions:
+            if m.lower() in message.get('comment').get('body'):
+                slackhub.dispatcher.post_message(user, usertype, [{
+                    'fallback': "Required plain-text summary of the attachment.",
+                    'color': 'C4E8B4',
+                    'text': message.get('comment').get('body'),
+                    'footer': '<'
+                              + message.get('comment').get('html_url')
+                              + '|'
+                              + 'Comment by '
+                              + message.get('comment').get('user').get('login')
+                              + ' on line '
+                              + str(message.get('comment').get('position'))
+                              + ' of '
+                              + message.get('comment').get('path')
+                              + '>'
+                }])
+                break  # only notify once per user
