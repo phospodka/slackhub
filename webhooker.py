@@ -51,6 +51,8 @@ def github_router(event, message):
     elif event == 'pull_request':
         if action == 'labeled':
             _labeled(message)
+        elif action == 'opened' or action == 'edited':
+            _pull_request(message)
     elif event == 'pull_request_review':
         if action == 'submitted':  # or action == 'edited':
             _pr_review(message)
@@ -126,15 +128,51 @@ def _labeled(message):
                                + '|'
                                + message.get('pull_request').get('user').get('login')
                                + '>',
-                    'text': '<'
-                            + message.get('pull_request').get('html_url')
-                            + '|#'
-                            + str(message.get('pull_request').get('number'))
-                            + ' '
-                            + message.get('pull_request').get('title')
-                            + '>'
+                    'title': '#'
+                             + str(message.get('pull_request').get('number'))
+                             + ' '
+                             + message.get('pull_request').get('title'),
+                    'title_link': message.get('pull_request').get('html_url'),
+                    'text': message.get('pull_request').get('body')
                 }])
                 break  # combine all labels matched if we are returning it? or maybe just not say?
+
+
+def _pull_request(message):
+    """
+    Handle pull request processing.  Specifically for actions other than labelling.
+    :param message: web hook json message from Github
+    """
+    action_insert = ' edited ' if message.get('action') == 'edited' else ' submitted '
+
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+        mentions = details['mention']
+
+        for m in mentions:
+            if m.lower() in message.get('pull_request').get('body'):
+                slackhub.dispatcher.post_message(user, usertype, [{
+                    'fallback': "Required plain-text summary of the attachment.",
+                    'color': '6CC644',
+                    'pretext': '<'
+                               + message.get('repository').get('html_url')
+                               + '|['
+                               + message.get('repository').get('name')
+                               + ']> Pull request'
+                               + action_insert
+                               + 'by <'
+                               + message.get('pull_request').get('user').get('url')
+                               + '|'
+                               + message.get('pull_request').get('user').get('login')
+                               + '>',
+                    'title': '#'
+                             + str(message.get('pull_request').get('number'))
+                             + ' '
+                             + message.get('pull_request').get('title'),
+                    'title_link': message.get('pull_request').get('html_url'),
+                    'text': message.get('pull_request').get('body')
+                }])
+                break  # only notify once per user
 
 
 def _pr_review(message):
