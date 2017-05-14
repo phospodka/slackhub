@@ -5,7 +5,7 @@ import slackhub.dispatcher
 #from slackhub.persister import get_cache
 
 """
-Handles webhook requests.
+Handles web hook requests.
 """
 
 # needs a sort of plugin architecture like the slackbot
@@ -46,25 +46,27 @@ def github_router(event, message):
     if event == 'commit_comment':
         pass
     elif event == 'issue_comment':
-        if action == 'created':
-            _comment_created(message)
+        if action == 'created':  # or action == 'edited':
+            _comment(message)
     elif event == 'pull_request':
         if action == 'labeled':
             _labeled(message)
     elif event == 'pull_request_review':
-        if action == 'submitted':
-            _pr_review_submitted(message)
+        if action == 'submitted':  # or action == 'edited':
+            _pr_review(message)
     elif event == 'pull_request_review_comment':
-        if action == 'created':
-            _pr_review_comment_created(message)
+        if action == 'created':  # or action == 'edited':
+            _pr_review_comment(message)
 
 
-def _comment_created(message):
+def _comment(message):
     """
     Handle processing of pull request / issue comment creation. They are apparently the same in
     Github's eyes.
     :param message: web hook json message from Github
     """
+    action_insert = ' edited ' if message.get('action') == 'edited' else ' '
+
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
         mentions = details['mention']
@@ -78,7 +80,9 @@ def _comment_created(message):
                                + message.get('repository').get('html_url')
                                + '|['
                                + message.get('repository').get('name')
-                               + ']> New comment by <'
+                               + ']> Comment'
+                               + action_insert
+                               + 'by <'
                                + message.get('comment').get('user').get('url')
                                + '|'
                                + message.get('comment').get('user').get('login')
@@ -130,10 +134,17 @@ def _labeled(message):
                             + message.get('pull_request').get('title')
                             + '>'
                 }])
-                break  # maybe combine all labels matched if we are returning it? or maybe just not say
+                break  # combine all labels matched if we are returning it? or maybe just not say?
 
 
-def _pr_review_submitted(message): # should change
+def _pr_review(message):
+    """
+    Handle processing of pull request review submissions.  This would be the summary text a user
+    provides just before submitting.
+    :param message: web hook json message from Github
+    """
+    action_insert = ' edited ' if message.get('action') == 'edited' else ' submitted '
+
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
         mentions = details['mention']
@@ -147,7 +158,9 @@ def _pr_review_submitted(message): # should change
                                + message.get('repository').get('html_url')
                                + '|['
                                + message.get('repository').get('name')
-                               + ']> Review submitted by <'
+                               + ']> Review'
+                               + action_insert
+                               + 'by <'
                                + message.get('review').get('user').get('url')
                                + '|'
                                + message.get('review').get('user').get('login')
@@ -163,7 +176,13 @@ def _pr_review_submitted(message): # should change
                 break  # only notify once per user
 
 
-def _pr_review_comment_created(message):
+def _pr_review_comment(message):
+    """
+    Handle processing of pull request review comments.
+    :param message: web hook json message from Github
+    """
+    action_insert = ' edited ' if message.get('action') == 'edited' else ' '
+
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
         mentions = details['mention']
@@ -177,7 +196,9 @@ def _pr_review_comment_created(message):
                     'footer': '<'
                               + message.get('comment').get('html_url')
                               + '|'
-                              + 'Comment by '
+                              + 'Comment'
+                              + action_insert
+                              + 'by '
                               + message.get('comment').get('user').get('login')
                               + ' on line '
                               + str(message.get('comment').get('position'))
