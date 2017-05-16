@@ -8,6 +8,7 @@ import slackhub.dispatcher
 Handles web hook requests.
 """
 
+
 # needs a sort of plugin architecture like the slackbot
 
 
@@ -41,13 +42,14 @@ def github_router(event, message):
         want - pr created; all comments created, edited; commit pushed
     '''
     action = message.get('action')
-    # print(event + " - " + action)
-    # print(message)
+    print(event + " - " + action)
+    print(message)
     if event == 'commit_comment':
-        pass
+        if action == 'created':
+            _commit_comment(message)
     elif event == 'issue_comment':
         if action == 'created':  # or action == 'edited':
-            _comment(message)
+            _issue_comment(message)
     elif event == 'pull_request':
         if action == 'labeled':
             _labeled(message)
@@ -61,7 +63,41 @@ def github_router(event, message):
             _pr_review_comment(message)
 
 
-def _comment(message):
+def _commit_comment(message):
+    """
+    Handle processing of commit comments that are outside of reviews.  Does not currently seem to
+    be an edited action yet, but keeping it just in case.
+    :param message: web hook json message from Github
+    """
+    action_insert = ' edited ' if message.get('action') == 'edited' else ' '
+
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+        mentions = details['mention']
+
+        for m in mentions:
+            if m.lower() in message.get('comment').get('body'):
+                slackhub.dispatcher.post_message(user, usertype, [{
+                    'fallback': message.get('comment').get('body'),
+                    'color': 'C6DAED',
+                    'text': message.get('comment').get('body'),
+                    'footer': '<'
+                              + message.get('comment').get('html_url')
+                              + '|'
+                              + 'Comment'
+                              + action_insert
+                              + 'by '
+                              + message.get('comment').get('user').get('login')
+                              + ' on line '
+                              + str(message.get('comment').get('position'))
+                              + ' of '
+                              + message.get('comment').get('path')
+                              + '>'
+                }])
+                break  # only notify once per user
+
+
+def _issue_comment(message):
     """
     Handle processing of pull request / issue comment creation. They are apparently the same in
     Github's eyes.
