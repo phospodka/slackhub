@@ -15,7 +15,7 @@ from slacker import Slacker
 sys.path.append('..')
 
 # WSGI used for web hooking
-app = Flask(__name__)
+flask = Flask(__name__)
 
 # direct access to the slack API when needed for special actions
 slack = Slacker(settings.API_TOKEN)
@@ -66,10 +66,12 @@ def slackbot_init():
 
 def webhook_init():
     logger.info('Initializing flask')
-    app.run(host='0.0.0.0')
+    #context = ('local.crt', 'local.key')#certificate and key files
+    #flask.run(debug=True, ssl_context=context)
+    flask.run(host='0.0.0.0')
 
 
-@app.route("/", methods=['GET', 'POST'])
+@flask.route("/slackhub", methods=['GET', 'POST'])  # add special token variable for identification?
 def webhook_sink():
     # needs to handle trusted listening to known hosts and maybe just POST
     slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)

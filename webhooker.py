@@ -1,8 +1,8 @@
-import slackhub.persister   # need to fix circular dependency
+import slackhub.persister  # need to fix circular dependency
 import slackhub.dispatcher
 
-#from slackhub.dispatcher import post_message
-#from slackhub.persister import get_cache
+# from slackhub.dispatcher import post_message
+# from slackhub.persister import get_cache
 
 """
 Handles web hook requests.
@@ -41,8 +41,8 @@ def github_router(event, message):
         want - pr created; all comments created, edited; commit pushed
     '''
     action = message.get('action')
-    print(event + " - " + action)
-    print(message)
+    # print(event + " - " + action)
+    # print(message)
     if event == 'commit_comment':
         pass
     elif event == 'issue_comment':
@@ -65,6 +65,9 @@ def _comment(message):
     """
     Handle processing of pull request / issue comment creation. They are apparently the same in
     Github's eyes.
+    todo need to test this against issues as well as pul request.  Event though they go through
+    the same type there may be some different (at the very least the wording might not want to be
+    pull request exactly.
     :param message: web hook json message from Github
     """
     action_insert = ' edited ' if message.get('action') == 'edited' else ' '
@@ -76,7 +79,11 @@ def _comment(message):
         for m in mentions:
             if m.lower() in message.get('comment').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
-                    'fallback': "Required plain-text summary of the attachment.",
+                    'fallback': message.get('repository').get('name')
+                                + ' Comment'
+                                + action_insert
+                                + 'by '
+                                + message.get('comment').get('user').get('login'),
                     'color': 'C4E8B4',
                     'pretext': '<'
                                + message.get('repository').get('html_url')
@@ -106,7 +113,7 @@ def _labeled(message):
     :param message: web hook json message from Github
     """
     label = message.get('label').get('name')
-    print('labeled: ' + label)
+    # print('labeled: ' + label)
 
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
@@ -115,15 +122,19 @@ def _labeled(message):
         for l in labels:
             if l.lower() == label:
                 slackhub.dispatcher.post_message(user, usertype, [{
-                    'fallback': "Required plain-text summary of the attachment.",
+                    'fallback': message.get('repository').get('name')
+                                + ' Pull request submitted by '
+                                + message.get('pull_request').get('user').get('login')
+                                + '. #'
+                                + str(message.get('pull_request').get('number'))
+                                + ' '
+                                + message.get('pull_request').get('title'),
                     'color': str(message.get('label').get('color')),
                     'pretext': '<'
                                + message.get('repository').get('html_url')
                                + '|['
                                + message.get('repository').get('name')
-                               + ']> ['
-                               + label
-                               + '] Pull request submitted by <'
+                               + ']> Pull request submitted by <'
                                + message.get('pull_request').get('user').get('url')
                                + '|'
                                + message.get('pull_request').get('user').get('login')
@@ -152,7 +163,15 @@ def _pull_request(message):
         for m in mentions:
             if m.lower() in message.get('pull_request').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
-                    'fallback': "Required plain-text summary of the attachment.",
+                    'fallback': message.get('repository').get('name')
+                                + ' Pull request'
+                                + action_insert
+                                + 'by '
+                                + message.get('pull_request').get('user').get('login')
+                                + '. #'
+                                + str(message.get('pull_request').get('number'))
+                                + ' '
+                                + message.get('pull_request').get('title'),
                     'color': '6CC644',
                     'pretext': '<'
                                + message.get('repository').get('html_url')
@@ -190,7 +209,15 @@ def _pr_review(message):
         for m in mentions:
             if m.lower() in message.get('review').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
-                    'fallback': "Required plain-text summary of the attachment.",
+                    'fallback': message.get('repository').get('name')
+                                + ' Review'
+                                + action_insert
+                                + 'by '
+                                + message.get('review').get('user').get('login')
+                                + ' on pull request #'
+                                + str(message.get('pull_request').get('number'))
+                                + ' '
+                                + message.get('pull_request').get('title'),
                     'color': 'C4E8B4',
                     'pretext': '<'
                                + message.get('repository').get('html_url')
@@ -228,7 +255,7 @@ def _pr_review_comment(message):
         for m in mentions:
             if m.lower() in message.get('comment').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
-                    'fallback': "Required plain-text summary of the attachment.",
+                    'fallback': message.get('comment').get('body'),
                     'color': 'C4E8B4',
                     'text': message.get('comment').get('body'),
                     'footer': '<'
