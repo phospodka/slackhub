@@ -5,7 +5,7 @@ import sys
 import threading
 import slackhub.webhooker   # need to fix circular dependency
 
-from flask import Flask, request
+from flask import Flask, abort, request
 from slackbot import settings
 from slackbot.bot import Bot
 from slacker import Slacker
@@ -59,20 +59,35 @@ def main():
 
 
 def slackbot_init():
+    """
+    Thread target for initializing slackbot
+    """
     logger.info('Initializing slackbot')
     bot = Bot()
     bot.run()
 
 
 def webhook_init():
+    """
+    Thread target for initializing flask
+    """
     logger.info('Initializing flask')
     #context = ('local.crt', 'local.key')#certificate and key files
     #flask.run(debug=True, ssl_context=context)
     flask.run(host='0.0.0.0')
 
 
-@flask.route("/slackhub", methods=['GET', 'POST'])  # add special token variable for identification?
-def webhook_sink():
+@flask.route("/slackhub/<token>", methods=['GET', 'POST'])
+def webhook_sink(token):
+    """
+    Entry point that needs to be publicly exposed for web hook processing.  The end of the route
+    needs to be a token that is defined in settings as SLACKHUB_TOKEN.  This will be used as a
+    pseudo secret so we can ignore requests from untrusted sources.
+    :param token: SLACKHUB_TOKEN parsed from the end of the request URL
+    :return: a http status code dependent on success or failure
+    """
+    if settings.SLACKHUB_TOKEN != token:
+        abort(403)
     # needs to handle trusted listening to known hosts and maybe just POST
     slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
     return "OK"
