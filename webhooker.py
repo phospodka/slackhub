@@ -42,14 +42,16 @@ def github_router(event, message):
         want - pr created; all comments created, edited; commit pushed
     '''
     action = message.get('action')
-    print(event + " - " + action)
-    print(message)
+    # print(event + ' - ' + str(action))
+    # print(message)
     if event == 'commit_comment':
         if action == 'created':
             _commit_comment(message)
     elif event == 'issue_comment':
         if action == 'created':  # or action == 'edited':
             _issue_comment(message)
+    elif event == 'ping':
+        _ping(message)
     elif event == 'pull_request':
         if action == 'labeled':
             _labeled(message)
@@ -183,6 +185,25 @@ def _labeled(message):
                     'text': message.get('pull_request').get('body')
                 }])
                 break  # combine all labels matched if we are returning it? or maybe just not say?
+
+
+def _ping(message):
+    """
+    Handle ping processing.
+    :param message: web hook json message from Github
+    """
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+
+        if usertype == 'channel':
+            slackhub.dispatcher.post_message(user, usertype, [{
+                'text': 'Link established with <'
+                        + message.get('repository').get('html_url')
+                        + '|'
+                        + message.get('repository').get('full_name')
+                        + '>',
+                'footer': 'Reactor Online. Sensors Online. Weapons Online. All Systems Nominal.'
+            }])
 
 
 def _pull_request(message):

@@ -1,3 +1,4 @@
+from slackbot import settings
 from slackbot.bot import listen_to
 from slackhub.dispatcher import post_message
 from slackhub.persister import get_cache
@@ -21,7 +22,7 @@ def github_listener(message):
     #print(message.body.keys())
 
     # only look at bot_messages; maybe only look at specific bot_id's too
-    if message.body['subtype'] == 'bot_message':
+    if message.body['subtype'] == 'bot_message' and settings.CHANNELLER_ENABLED:
         # get the message text so we can process it for subscriptions
         attachments = message.body['attachments']
 

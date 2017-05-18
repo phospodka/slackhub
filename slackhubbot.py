@@ -86,7 +86,7 @@ def webhook_sink(token):
     :param token: SLACKHUB_TOKEN parsed from the end of the request URL
     :return: a http status code dependent on success or failure
     """
-    if settings.SLACKHUB_TOKEN != token:
+    if settings.SLACKHUB_TOKEN != token or not settings.WEBHOOK_ENABLED:
         abort(403)
     # needs to handle trusted listening to known hosts and maybe just POST
     slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
