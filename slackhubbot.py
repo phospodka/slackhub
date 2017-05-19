@@ -1,7 +1,10 @@
+import sys
+# hack for now to include slackhub as a module until I get the egg link working
+sys.path.append('..')
+
 import logging
 import logging.config
 import json
-import sys
 import threading
 import slackhub.webhooker   # need to fix circular dependency
 
@@ -10,9 +13,6 @@ from slackbot import settings
 from slackbot.bot import Bot
 from slacker import Slacker
 #from slackhub.webhooker import github_router
-
-# hack for now to include slackhub as a module until I get the egg link working
-sys.path.append('..')
 
 # WSGI used for web hooking
 flask = Flask(__name__)
