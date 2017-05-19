@@ -89,7 +89,7 @@ def webhook_sink(token):
     if settings.SLACKHUB_TOKEN != token or not settings.WEBHOOK_ENABLED:
         abort(403)
     elif request.method == 'GET':
-        return 'Boop'
+        return 'boop'
     # needs to handle trusted listening to known hosts and maybe just POST
     slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
     return "OK"

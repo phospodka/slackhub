@@ -10,14 +10,14 @@ Handles user configuration of notifications.
 """
 
 
-@respond_to('add (branch|mention) (.*)')
+@respond_to('add (branch|label|mention) (.*)')
 def add_actions(message, action, target):
     """
-    Add subscriptions of a branch or mention.  Only mention is currently functional i.e. `add mention username`
+    Add subscriptions of a branch, label, or mention.  Only mention and label are currently functional i.e. `add mention username`
     """
     """
-    Add subscriptions of a branch or mention for the requesting user.  Reply to the user informing
-    what they requested.
+    Add subscriptions of a branch, label,  or mention for the requesting user.  Reply to the user
+    informing what they requested.
     :param message: message body that holds things like the user and how to reply
     :param action: type of subscription to add (branch or mention)
     :param target: text that represents what to subscribe to
@@ -42,14 +42,14 @@ def add_actions(message, action, target):
     message.reply('Subscribed to ' + action + ' [*' + target + '*]')
 
 
-@respond_to('list (all|branch|mention)')
+@respond_to('list (all|branch|label|mention)')
 def list_actions(message, action):
     """
     List stored details for a user.  i.e. `list mention`
     """
     """
     List available values for a requesting user.  Options are everything about the user, branch
-    subscriptions, and mention subscriptions.  Reply with the values.
+    label, and mention subscriptions.  Reply with the values.
     :param message: message body that holds things like the user and how to reply
     :param action: what type of information to list
     """
@@ -61,6 +61,8 @@ def list_actions(message, action):
             data = json.dumps(load_user(username))
         elif action == 'branch':
             data = json.dumps(load_user(username)['branch'])
+        elif action == 'label':
+            data = json.dumps(load_user(username)['label'])
         elif action == 'mention':
             data = json.dumps(load_user(username)['mention'])
     except KeyError:
@@ -69,13 +71,13 @@ def list_actions(message, action):
     message.reply('You are subscribed to the following: ' + data)
 
 
-@respond_to('remove (branch|mention) (.*)')
+@respond_to('remove (branch|label|mention) (.*)')
 def remove_actions(message, action, target):
     """
-    Remove subscriptions of a branch or mention.  i.e. `remove mention username`
+    Remove subscriptions of a branch, label, or mention.  i.e. `remove mention username`
     """
     """
-    Remove subscriptions of a branch or mention for the requesting user.  Reply to the user
+    Remove subscriptions of a branch, label, or mention for the requesting user.  Reply to the user
     informing what they requested.
     :param message: message body that holds things like the user and how to reply
     :param action: type of subscription to remove (branch or mention)
