@@ -342,7 +342,7 @@ def _pr_review_requested(message):
         usertype = details['type']
 
         if usertype == 'user':
-            enabled = details['enabled'].get('reviews')
+            enabled = details['enabled']['review']
             username = details['username']
 
             if enabled and username == message.get('requested_reviewer').get('login'):
