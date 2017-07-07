@@ -59,6 +59,8 @@ def github_router(event, message):
             _pull_request(message)
         elif action == 'review_requested':
             _pr_review_requested(message)
+        elif action == 'assigned':
+            _pr_assigned(message)
     elif event == 'pull_request_review':
         if action == 'submitted':  # or action == 'edited':
             _pr_review(message)
@@ -199,6 +201,7 @@ def _ping(message):
 
         if usertype == 'channel':
             slackhub.dispatcher.post_message(user, usertype, [{
+                'fallback': 'Link established with ' + message.get('repository').get('full_name'),
                 'text': 'Link established with <'
                         + message.get('repository').get('html_url')
                         + '|'
@@ -251,6 +254,38 @@ def _pull_request(message):
                     'text': message.get('pull_request').get('body')
                 }])
                 break  # only notify once per user
+
+
+def _pr_assigned(message):
+    """
+    Handle processing of pull request assigned actions.
+    :param message: web hook json message from Github
+    """
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+
+        if usertype == 'user':
+            enabled = details['enabled']['review']
+            username = details['username']
+
+            if enabled and username == message.get('assignee').get('login'):
+                slackhub.dispatcher.post_message(user, usertype, [{
+                    'fallback': message.get('repository').get('name')
+                                + ' Assigned pull request # '
+                                + message.get('pull_request').get('title'),
+                    'color': '4183C4',
+                    'text': '<'
+                            + message.get('repository').get('html_url')
+                            + '|['
+                            + message.get('repository').get('name')
+                            + ']> Assigned pull request <'
+                            + message.get('pull_request').get('html_url')
+                            + '|#'
+                            + str(message.get('pull_request').get('number'))
+                            + ' '
+                            + message.get('pull_request').get('title')
+                            + '>'
+                }])
 
 
 def _pr_review(message):
@@ -348,14 +383,14 @@ def _pr_review_requested(message):
             if enabled and username == message.get('requested_reviewer').get('login'):
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('repository').get('name')
-                                + ' Review requested for # '
+                                + ' Review requested for pull request # '
                                 + message.get('pull_request').get('title'),
                     'color': '4183C4',
                     'text': '<'
                             + message.get('repository').get('html_url')
                             + '|['
                             + message.get('repository').get('name')
-                            + ']> Review requested for <'
+                            + ']> Review requested for pull request <'
                             + message.get('pull_request').get('html_url')
                             + '|#'
                             + str(message.get('pull_request').get('number'))

@@ -56,10 +56,11 @@ def add_actions(message, action, target):
         details = {'mention': [],
                    'branch': [],
                    'label': [],
-                   'enabled': {'branch': True,
-                               'mention': True,
-                               'review': True,
-                               'label': True},
+                   'enabled': {
+                       'branch': True,
+                       'label': True,
+                       'mention': True,
+                       'review': True},
                    'type': 'user',
                    'username': username}
 
@@ -106,7 +107,7 @@ def remove_actions(message, action, target):
 @respond_to('disable (all|branch|label|mention|review)')
 def disable_notifications(message, target):
     """
-    Disable notifications selectively or for all while preserving settings.  i.e. disable branch
+    Disable notifications selectively or for all while preserving settings.  i.e. `disable branch`
     """
     '''
     Disable notifications for the requesting user.  Preserves settings so they can be disabled at
@@ -134,7 +135,7 @@ def disable_notifications(message, target):
 @respond_to('enable (all|branch|label|mention|review)')
 def enable_notifications(message, target):
     """
-    Enable notifications selectively or for all while preserving settings.  i.e. enable branch
+    Enable notifications selectively or for all while preserving settings.  i.e. `enable branch`
     """
     '''
     Enable notifications for the requesting user.  Preserves settings so they can be enabled at
@@ -162,7 +163,7 @@ def enable_notifications(message, target):
 @respond_to('username (.*)')
 def set_username(message, username):
     """
-    Set your github username to links notifications to this slack account.  i.e. username batman
+    Set your github username to links notifications to this slack account.  i.e. `username batman`
     """
     '''
     Set the github username so we can link it to this slack user and provide notifications based on
