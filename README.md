@@ -14,11 +14,6 @@ Install the main requirements with:
 
 `pip install -r requirements.txt`
 
-Currently needs my fork of [slackbot](https://github.com/phospodka/slackbot) to handle processing messages from bots.
-This is a temporary measure until I get the web hook processing complete.  After downloading run:
-
-`pip install -e {location of download}`
-
 Everything is tested using Python version 3.4
 
 Usage
