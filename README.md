@@ -30,19 +30,36 @@ The important commands are:
 * remove (branch|mention) (.*)
 * add (branch|mention) (.*)
 
+
+Bad command "help", You can ask me one of the following questions:
+* add (branch|label|mention) (.*)
+* disable (all|branch|label|mention|review)
+* enable (all|branch|label|mention|review)
+* list (all|branch|enabled|label|mention|username)
+* remove (branch|label|mention) (.*)
+* username (.*)
+
+**add** - will add the subscription to the user asking.  It needs the option of what type to
+remove followed by the text of the subscription.
+
+**disable** - will disable notifications selectively or for all depending on the selection.
+
+**enable** - will enable notifications selectively or for all depending on the selection.
+
 **list** - will list details about the subscriptions for the user asking.  It needs the option of what to list provided.
 
 **remove** - will remove the subscription from the user asking.  It needs the option of what type to 
-add followed by the text of the subscription. 
- 
-**add** - will add the subscription to the user asking.  It needs the option of what type to 
-remove followed by the text of the subscription.
+add followed by the text of the subscription.
+
+**username** - will set the github user name to link to for certain kind of notifications.
+
  
 State
 -------------------------
 
-Currently subscriptions to mentions are functional when inspecting pull request comments.  Branches can be subscribed 
-to, but no effect is taken.
+Currently subscriptions to mentions, labels, review requests, and assigned requests are functional when inspecting pull request
+comments when using webhooks.  When using channel scraping only keyword mentions are available. Branches can be subscribed to,
+but no effect is taken.
 
 License
 -------------------------------
@@ -58,6 +75,5 @@ There are a number of items I'd like to do.
 * finish branch subscription functionality
 * add any missing support for mentions
 * add some sort of logging
-* add web hook processing instead of relying on channel scraping (maybe keep as a fallback)
 * tests ;_;
 * figure out how to make this installable
