@@ -7,8 +7,8 @@ updates.  This is done by messaging the bot commands to manage subscriptions to 
 Dependencies
 ------------------------
 
-Relies heavily on [slacker](https://github.com/os/slacker) and [slackbot](https://github.com/lins05/slackbot) Python 
-projects.
+Relies heavily on [slacker](https://github.com/os/slacker), [slackbot](https://github.com/lins05/slackbot), and
+[flask](https://github.com/pallets/flask) Python projects.
 
 Install the main requirements with:
 
