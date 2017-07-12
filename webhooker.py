@@ -268,7 +268,7 @@ def _pr_assigned(message):
             enabled = details['enabled']['review']
             username = details['username']
 
-            if enabled and username == message.get('assignee').get('login'):
+            if enabled and username.lower() == message.get('assignee').get('login').lower():
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('repository').get('name')
                                 + ' Assigned pull request # '
@@ -380,7 +380,8 @@ def _pr_review_requested(message):
             enabled = details['enabled']['review']
             username = details['username']
 
-            if enabled and username == message.get('requested_reviewer').get('login'):
+            if enabled \
+                    and username.lower() == message.get('requested_reviewer').get('login').lower():
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('repository').get('name')
                                 + ' Review requested for pull request # '

@@ -42,6 +42,7 @@ def main():
         }
     logging.basicConfig(**kw)
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
     logger.info(str(sys.path))
 
     # both slackbot and flask execute til interruption so need to be in their own thread.
