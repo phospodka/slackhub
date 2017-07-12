@@ -81,6 +81,9 @@ def _commit_comment(message):
         usertype = details['type']
         mentions = details['mention']
 
+        if usertype == 'user':
+            mentions.append(details['username'])
+
         for m in mentions:
             if m.lower() in message.get('comment').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
@@ -117,6 +120,9 @@ def _issue_comment(message):
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
         mentions = details['mention']
+
+        if usertype == 'user':
+            mentions.append(details['username'])
 
         for m in mentions:
             if m.lower() in message.get('comment').get('body'):
@@ -222,6 +228,9 @@ def _pull_request(message):
         usertype = details['type']
         mentions = details['mention']
 
+        if usertype == 'user':
+            mentions.append(details['username'])
+
         for m in mentions:
             if m.lower() in message.get('pull_request').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
@@ -300,6 +309,9 @@ def _pr_review(message):
         usertype = details['type']
         mentions = details['mention']
 
+        if usertype == 'user':
+            mentions.append(details['username'])
+
         for m in mentions:
             if m.lower() in message.get('review').get('body'):
                 slackhub.dispatcher.post_message(user, usertype, [{
@@ -345,6 +357,9 @@ def _pr_review_comment(message):
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
         mentions = details['mention']
+
+        if usertype == 'user':
+            mentions.append(details['username'])
 
         for m in mentions:
             if m.lower() in message.get('comment').get('body'):
