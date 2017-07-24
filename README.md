@@ -16,17 +16,47 @@ Install the main requirements with:
 
 Everything is tested using Python version 3.4
 
+Getting started
+------------------------
+
+After downloading and installing the requirements you will want to edit a couple of the config items in **slackbot_settings.py**.
+* API_TOKEN - create a bot in slack and generate a token to use here.  This is what allows the bot to communicate with slack.
+* BOT_NAME - set the name of the bot you created in slack here.  This allows this code to send notifications to the bot.
+* SLACKHUB_TOKEN - set this to your favorite random string.  This will be used as part of the URL for the webhook sink for github.
+
+With all the settings set, run the main program **slackhubbot.py** with either:
+* `python slackhubbot.py`
+* `nohup python slackhubbot.py &`
+
+When starting, it is important to either run the command from the directory that **slackhubbot.py** is in, or to add the folder where
+it is checked out to the PATH variable.  i.e. `PATH=$PATH:/slackhub`.  This is because starting this is still somewhat hacky with 
+getting the dependencies in place.
+
+Slackhub will create a **/data** directory in the checkout folder.  This is where individuals files per user will be created to
+store their settings.  It should create it for you, but will want to make sure the user you start this with has permissions to
+create the folder and the files in it.
+
+If all has gone well, you should see some output that looks like:
+
+```
+[DD/MM/YYYY 00:00:00] Initializing slackbot
+[DD/MM/YYYY 00:00:00] Initializing flask
+[DD/MM/YYYY 00:00:00] loading plugin "slackhub"
+[DD/MM/YYYY 00:00:00] registered respond_to plugin "list_actions" to "list (all|branch|enabled|label|mention|username)"
+[DD/MM/YYYY 00:00:00] registered respond_to plugin "add_actions" to "add (branch|label|mention) (.*)"
+[DD/MM/YYYY 00:00:00] registered respond_to plugin "remove_actions" to "remove (branch|label|mention) (.*)"
+[DD/MM/YYYY 00:00:00] registered respond_to plugin "disable_notifications" to "disable (all|branch|label|mention|review)"
+[DD/MM/YYYY 00:00:00] registered respond_to plugin "enable_notifications" to "enable (all|branch|label|mention|review)"
+[DD/MM/YYYY 00:00:00] registered respond_to plugin "set_username" to "username (.*)"
+[DD/MM/YYYY 00:00:00] connected to slack RTM api
+[DD/MM/YYYY 00:00:00] keep active thread started
+```
+
 Usage
 ------------------------
 
 The important commands are:
 
-* list (all|branch|mention)
-* remove (branch|mention) (.*)
-* add (branch|mention) (.*)
-
-
-Bad command "help", You can ask me one of the following questions:
 * add (branch|label|mention) (.*)
 * disable (all|branch|label|mention|review)
 * enable (all|branch|label|mention|review)
