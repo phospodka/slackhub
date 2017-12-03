@@ -48,7 +48,7 @@ def github_router(event, message):
         if action == 'created':
             _commit_comment(message)
     elif event == 'issue_comment':
-        if action == 'created':  # or action == 'edited':
+        if action == 'created' or action == 'edited':
             _issue_comment(message)
     elif event == 'ping':
         _ping(message)
@@ -62,10 +62,10 @@ def github_router(event, message):
         elif action == 'assigned':
             _pr_assigned(message)
     elif event == 'pull_request_review':
-        if action == 'submitted':  # or action == 'edited':
+        if action == 'submitted' or action == 'edited':
             _pr_review(message)
     elif event == 'pull_request_review_comment':
-        if action == 'created':  # or action == 'edited':
+        if action == 'created' or action == 'edited':
             _pr_review_comment(message)
 
 
@@ -79,7 +79,7 @@ def _commit_comment(message):
 
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
-        mentions = details['mention']
+        mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
@@ -119,7 +119,7 @@ def _issue_comment(message):
 
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
-        mentions = details['mention']
+        mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
@@ -226,7 +226,7 @@ def _pull_request(message):
 
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
-        mentions = details['mention']
+        mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
@@ -274,7 +274,7 @@ def _pr_assigned(message):
         usertype = details['type']
 
         if usertype == 'user':
-            enabled = details['enabled']['review']
+            enabled = details['enabled']['pr']
             username = details['username']
 
             if enabled and username.lower() == message.get('assignee').get('login').lower():
@@ -307,7 +307,7 @@ def _pr_review(message):
 
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
-        mentions = details['mention']
+        mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
@@ -356,7 +356,7 @@ def _pr_review_comment(message):
 
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
-        mentions = details['mention']
+        mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
@@ -392,7 +392,7 @@ def _pr_review_requested(message):
         usertype = details['type']
 
         if usertype == 'user':
-            enabled = details['enabled']['review']
+            enabled = details['enabled']['pr']
             username = details['username']
 
             if enabled \

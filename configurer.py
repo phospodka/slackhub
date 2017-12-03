@@ -60,7 +60,7 @@ def add_actions(message, action, target):
                        'branch': True,
                        'label': True,
                        'mention': True,
-                       'review': True},
+                       'pr': True},
                    'type': 'user',
                    'username': username}
 
@@ -104,7 +104,7 @@ def remove_actions(message, action, target):
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*]')
 
 
-@respond_to('disable (all|branch|label|mention|review)')
+@respond_to('disable (all|branch|label|mention|pr)')
 def disable_notifications(message, target):
     """
     Disable notifications selectively or for all while preserving settings.  i.e. `disable branch`
@@ -132,7 +132,7 @@ def disable_notifications(message, target):
     message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
-@respond_to('enable (all|branch|label|mention|review)')
+@respond_to('enable (all|branch|label|mention|pr)')
 def enable_notifications(message, target):
     """
     Enable notifications selectively or for all while preserving settings.  i.e. `enable branch`
