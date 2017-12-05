@@ -62,7 +62,7 @@ def github_router(event, message):
         elif action == 'assigned':
             _pr_assigned(message)
     elif event == 'pull_request_review':
-        if action == 'submitted' or action == 'edited':
+        if action == 'submitted':  # or action == 'edited':  # leaving this off for now since a review sends both
             _pr_review(message)
     elif event == 'pull_request_review_comment':
         if action == 'created' or action == 'edited':
@@ -85,7 +85,8 @@ def _commit_comment(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            if m.lower() in message.get('comment').get('body'):
+            body = message.get('comment').get('body')
+            if body is not None and m.lower() in body:
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('comment').get('body'),
                     'color': 'C6DAED',
@@ -125,7 +126,8 @@ def _issue_comment(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            if m.lower() in message.get('comment').get('body'):
+            body = message.get('comment').get('body')
+            if body is not None and m.lower() in body:
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('repository').get('name')
                                 + ' Comment'
@@ -232,7 +234,8 @@ def _pull_request(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            if m.lower() in message.get('pull_request').get('body'):
+            body = message.get('pull_request').get('body')
+            if body is not None and m.lower() in body:
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('repository').get('name')
                                 + ' Pull request'
@@ -260,7 +263,7 @@ def _pull_request(message):
                              + ' '
                              + message.get('pull_request').get('title'),
                     'title_link': message.get('pull_request').get('html_url'),
-                    'text': message.get('pull_request').get('body')
+                    'text': message.get('pull_request').get('body')  # pdh here
                 }])
                 break  # only notify once per user
 
@@ -313,7 +316,8 @@ def _pr_review(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            if m.lower() in message.get('review').get('body'):
+            body = message.get('review').get('body')
+            if body is not None and m.lower() in body:
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('repository').get('name')
                                 + ' Review'
@@ -362,7 +366,8 @@ def _pr_review_comment(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            if m.lower() in message.get('comment').get('body'):
+            body = message.get('comment').get('body')
+            if body is not None and m.lower() in body:
                 slackhub.dispatcher.post_message(user, usertype, [{
                     'fallback': message.get('comment').get('body'),
                     'color': 'C4E8B4',

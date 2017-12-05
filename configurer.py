@@ -49,20 +49,7 @@ def add_actions(message, action, target):
     :param target: text that represents what to subscribe to
     """
     username = get_username(message)
-    details = load_user(username)
-
-    # if the user does not exist then create the subscription template
-    if not details:
-        details = {'mention': [],
-                   'branch': [],
-                   'label': [],
-                   'enabled': {
-                       'branch': True,
-                       'label': True,
-                       'mention': True,
-                       'pr': True},
-                   'type': 'user',
-                   'username': username}
+    details = get_details(username)
 
     try:
         my_set = set(details[action])
@@ -90,7 +77,7 @@ def remove_actions(message, action, target):
     :param target: text that represents what to unsubscribe from
     """
     username = get_username(message)
-    details = load_user(username)
+    details = get_details(username)
 
     if details:
         try:
@@ -116,7 +103,7 @@ def disable_notifications(message, target):
     :param target: type of notification to disable
     '''
     username = get_username(message)
-    details = load_user(username)
+    details = get_details(username)
 
     if details:
         try:
@@ -144,7 +131,7 @@ def enable_notifications(message, target):
     :param target: type of notification to enable
     '''
     username = get_username(message)
-    details = load_user(username)
+    details = get_details(username)
 
     if details:
         try:
@@ -172,7 +159,7 @@ def set_username(message, username):
     :param username: github username
     '''
     slack_username = get_username(message)
-    details = load_user(slack_username)
+    details = get_details(slack_username)
 
     if details:
         try:
@@ -182,3 +169,27 @@ def set_username(message, username):
 
     save_user(details, username)
     message.reply('Github username set as [*' + username + '*].')
+
+
+def get_details(username):
+    """
+    Get the details about a user and create the template if they do not exist yet
+    :param username: slack username to lookup user by
+    :return: set of details about user
+    """
+    details = load_user(username)
+
+    # if the user does not exist then create the subscription template
+    if not details:
+        details = {'mention': [],
+                   'branch': [],
+                   'label': [],
+                   'enabled': {
+                       'branch': True,
+                       'label': True,
+                       'mention': True,
+                       'pr': True},
+                   'type': 'user',
+                   'username': username}
+
+    return details
