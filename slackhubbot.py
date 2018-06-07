@@ -102,8 +102,10 @@ def get_username(msg):
     :param msg: message body to parse
     :return: username from the message
     """
-    msguser = json.loads(slack.users.info(msg.body['user']).raw)
-    return msguser['user']['name']
+    #todo use this as an admin load user call
+    #msguser = json.loads(slack.users.info(msg.body['user']).raw)
+    #return msguser['user']['name']
+    return msg.body['user']
 
 
 # main it up a notch
