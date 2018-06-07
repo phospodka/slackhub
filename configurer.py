@@ -167,7 +167,7 @@ def set_username(message, username):
         except KeyError:
             pass
 
-    save_user(details, username)
+    save_user(details, slack_username)
     message.reply('Github username set as [*' + username + '*].')
 
 
