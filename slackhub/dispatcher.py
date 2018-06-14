@@ -13,7 +13,7 @@ def post_message(channel, usertype, attachments):
     :param usertype: type of user to send to
     :param attachments: array of attachment objects that hold slack's complex formatted message
     """
-    channel = '@' + channel if usertype == 'user' else channel  # maybe externalise this logic
+    # channel = '@' + channel if usertype == 'user' else channel  # maybe externalise this logic
     slack.chat.post_message(channel,                      # channel / user to message
                             None,                         # plain text to send
                             settings.BOT_NAME,            # username to reply as
