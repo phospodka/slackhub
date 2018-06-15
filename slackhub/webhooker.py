@@ -22,7 +22,9 @@ def github_router(event, message):
     '''
     known events -> actions:
         pull_request
+            closed
             labeled
+            opened
         ping
         commit_comment
             created
@@ -43,8 +45,8 @@ def github_router(event, message):
         want - pr created; all comments created, edited; commit pushed
     '''
     action = message.get('action')
-    # print(event + ' - ' + str(action))
-    # print(message)
+    print(event + ' - ' + str(action))
+    print(message)
     if event == 'commit_comment':
         if action == 'created':
             _commit_comment(message)
@@ -58,6 +60,8 @@ def github_router(event, message):
             _labeled(message)
         elif action == 'opened' or action == 'edited':
             _pull_request(message)
+        elif action == 'closed':
+            _pr_closed(message)
         elif action == 'review_requested':
             _pr_review_requested(message)
         elif action == 'assigned':
@@ -171,6 +175,20 @@ def _pull_request(message):
                 slackhub.dispatcher.post_message(user, usertype,
                         slackhub.formatter.github_pr(message, action))
                 break  # only notify once per user
+
+
+def _pr_closed(message):
+    """
+    Handle processing of pull request closed actions.
+    :param message: web hook json message from Github
+    """
+    for user, details in slackhub.persister.get_cache().items():
+        usertype = details['type']
+
+        if usertype == 'channel':
+            if details['operation']['closed']:
+                slackhub.dispatcher.post_message(user, usertype,
+                                                 slackhub.formatter.github_pr_closed(message))
 
 
 def _pr_assigned(message):

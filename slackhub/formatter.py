@@ -253,3 +253,29 @@ def github_pr_review_request(message):
     }]
 
 
+def github_pr_closed(message):
+    return [{
+        'fallback': message.get('repository').get('name')
+                    + ' Pull request closed by '
+                    + message.get('pull_request').get('user').get('login')
+                    + '. #'
+                    + str(message.get('pull_request').get('number'))
+                    + ' '
+                    + message.get('pull_request').get('title'),
+        'color': '2CBE4E',
+        'pretext': '<'
+                   + message.get('repository').get('html_url')
+                   + '|['
+                   + message.get('repository').get('name')
+                   + ']> Pull request closed by <'
+                   + message.get('pull_request').get('user').get('url')
+                   + '|'
+                   + message.get('pull_request').get('user').get('login')
+                   + '>',
+        'title': '#'
+                 + str(message.get('pull_request').get('number'))
+                 + ' '
+                 + message.get('pull_request').get('title'),
+        'title_link': message.get('pull_request').get('html_url')
+    }]
+
