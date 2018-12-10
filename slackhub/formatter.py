@@ -62,33 +62,29 @@ def github_issue_comment(message, action):
 
 def github_label(message):
     """
-    Format github label assignment for slack.
+    Format github label assignment for slack.  Utilize label color in message.
     :return: json formatted slack message
     """
     return [{
         'fallback': message.get('repository').get('name')
-                    + ' Pull request submitted by '
-                    + message.get('pull_request').get('user').get('login')
-                    + '. #'
-                    + str(message.get('pull_request').get('number'))
-                    + ' '
+                    + ' Pull request labelled ['
+                    + str(message.get('label').get('name'))
+                    + '] # '
                     + message.get('pull_request').get('title'),
         'color': str(message.get('label').get('color')),
-        'pretext': '<'
-                   + message.get('repository').get('html_url')
-                   + '|['
-                   + message.get('repository').get('name')
-                   + ']> Pull request submitted by <'
-                   + message.get('pull_request').get('user').get('url')
-                   + '|'
-                   + message.get('pull_request').get('user').get('login')
-                   + '>',
-        'title': '#'
-                 + str(message.get('pull_request').get('number'))
-                 + ' '
-                 + message.get('pull_request').get('title'),
-        'title_link': message.get('pull_request').get('html_url'),
-        'text': message.get('pull_request').get('body')
+        'text': '<'
+                + message.get('repository').get('html_url')
+                + '|['
+                + message.get('repository').get('name')
+                + ']> Pull request labelled [*'
+                + str(message.get('label').get('name'))
+                + '*] <'
+                + message.get('pull_request').get('html_url')
+                + '|#'
+                + str(message.get('pull_request').get('number'))
+                + ' '
+                + message.get('pull_request').get('title')
+                + '>'
     }]
 
 
