@@ -274,4 +274,3 @@ def github_pr_closed(message):
                  + message.get('pull_request').get('title'),
         'title_link': message.get('pull_request').get('html_url')
     }]
-

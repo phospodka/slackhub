@@ -2,8 +2,7 @@ import json
 
 from slackbot.bot import respond_to
 from slackhub.slackhubbot import get_username
-from slackhub.persister import load_user
-from slackhub.persister import save_user
+from slackhub.persister import list_repos, load_user, save_user
 
 """
 Handles user configuration of notifications.
@@ -169,6 +168,25 @@ def set_username(message, username):
 
     save_user(details, slack_username)
     message.reply('Github username set as [*' + username + '*].')
+
+
+@respond_to('repos')
+def list_repositories(message):
+    """
+    List the repositories being watched
+    """
+    '''
+    List the repositories being watched and used by the system.
+    :param message: message body that holds things like the user and how to reply
+    '''
+    repos = list_repos()
+
+    reply = '```'
+    for repo in repos:
+        reply += '\n' + repo
+    reply += '```'
+
+    message.reply('The following repos are being watched:' + reply)
 
 
 def get_details(username):

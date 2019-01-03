@@ -147,6 +147,8 @@ def _ping(message):
     Handle ping processing.
     :param message: web hook json message from Github
     """
+    slackhub.persister.add_repo(message.get('repository').get('name'))
+
     for user, details in slackhub.persister.get_cache().items():
         usertype = details['type']
 

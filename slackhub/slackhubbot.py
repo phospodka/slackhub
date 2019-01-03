@@ -102,6 +102,7 @@ def get_username(msg):
     :param msg: message body to parse
     :return: username from the message
     """
+    #todo I think this can be moved out and remove the circular dependency since I do not need to hit slack as a service anymore
     #todo use this as an admin load user call
     #msguser = json.loads(slack.users.info(msg.body['user']).raw)
     #return msguser['user']['name']
