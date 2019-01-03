@@ -1,9 +1,13 @@
+import json
 from slackbot import settings
-from slackhub.slackhubbot import slack
+from slacker import Slacker
 
 """
 Handles message posting to slack.
 """
+
+# direct access to the slack API when needed for special actions
+slack = Slacker(settings.API_TOKEN)
 
 
 def post_message(channel, usertype, attachments):
@@ -23,3 +27,8 @@ def post_message(channel, usertype, attachments):
                             attachments,                  # attachments for fancy text
                             False,                        # unfurl links
                             False)                        # unfurl media
+
+
+def get_slack_username(user_id):
+    user = json.loads(slack.users.info(user_id).raw)
+    return user['user']['name']

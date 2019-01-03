@@ -1,7 +1,6 @@
 import json
 
 from slackbot.bot import respond_to
-from slackhub.slackhubbot import get_username
 from slackhub.persister import list_repos, load_user, save_user
 
 """
@@ -20,7 +19,7 @@ def list_actions(message, action):
     :param message: message body that holds things like the user and how to reply
     :param action: what type of information to list
     """
-    username = get_username(message)
+    username = get_user_id(message)
     data = None
 
     try:
@@ -47,7 +46,7 @@ def add_actions(message, action, target):
     :param action: type of subscription to add (branch or mention)
     :param target: text that represents what to subscribe to
     """
-    username = get_username(message)
+    username = get_user_id(message)
     details = get_details(username)
 
     try:
@@ -75,7 +74,7 @@ def remove_actions(message, action, target):
     :param action: type of subscription to remove (branch or mention)
     :param target: text that represents what to unsubscribe from
     """
-    username = get_username(message)
+    username = get_user_id(message)
     details = get_details(username)
 
     if details:
@@ -101,7 +100,7 @@ def disable_notifications(message, target):
     :param message: message body that holds things like the user and how to reply
     :param target: type of notification to disable
     '''
-    username = get_username(message)
+    username = get_user_id(message)
     details = get_details(username)
 
     if details:
@@ -129,7 +128,7 @@ def enable_notifications(message, target):
     :param message: message body that holds things like the user and how to reply
     :param target: type of notification to enable
     '''
-    username = get_username(message)
+    username = get_user_id(message)
     details = get_details(username)
 
     if details:
@@ -157,7 +156,7 @@ def set_username(message, username):
     :param message: message body that holds things like the user and how to reply
     :param username: github username
     '''
-    slack_username = get_username(message)
+    slack_username = get_user_id(message)
     details = get_details(slack_username)
 
     if details:
@@ -211,3 +210,12 @@ def get_details(username):
                    'username': username}
 
     return details
+
+
+def get_user_id(message):
+    """
+    Get the user id from the message body
+    :param message: message body to parse
+    :return: user id from the message
+    """
+    return message.user['id']

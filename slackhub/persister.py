@@ -2,8 +2,15 @@ import json
 import os
 import sys
 
+#todo condense write actions and populate actions into a single method that takes input
+#todo make certain methods private (like write and populate)
+#todo clean deprecated methods
+
 # the all important cache of users; all important.
 _cache = {}
+
+# cache of the admins in the system
+_admins = []
 
 # cache of the repos being maintained
 _repos = []
@@ -14,10 +21,13 @@ _users = {}
 # directory of the system data
 _datadir = os.path.dirname(os.path.realpath(sys.argv[0])) + '/data/'
 
+# directory of the admin data
+_admindir = _datadir + 'admins/'
+
 # directory of the repository data
 _repodir = _datadir + 'repos/'
 
-# directory of the repository data
+# directory of the user data
 _userdir = _datadir + 'users/'
 
 
@@ -38,6 +48,7 @@ def load_user(user):
 
 def load_user_from_file(user):
     """
+    deprecated
     Load the user json data from file and return as a Python object structure.
     :param user: username to load
     :return: user data as a Python object
@@ -54,6 +65,7 @@ def load_user_from_file(user):
 
 def list_users(path):
     """
+    internal
     Get the list of users being maintained by the bot
     :param path: path to search for users
     :return: list of usernames
@@ -76,6 +88,7 @@ def get_cache():
 
 def populate_cache():
     """
+    internal
     Walk the persistent file directory and populate the cache
     """
     os.makedirs(_datadir, exist_ok=True)
@@ -103,6 +116,7 @@ def save_user(data, user):
 
 def write_user_to_file(data, user):
     """
+    internal
     Write the user json data out to file
     :param data: data to write
     :param user: user to write data for
@@ -113,18 +127,19 @@ def write_user_to_file(data, user):
 
 def populate_repos():
     """
+    internal
     Load the repos from storage into the cache
     """
     os.makedirs(_repodir, exist_ok=True)
 
-    with open(_repodir + 'repos.txt', 'a+') as f:
+    with open(_repodir + 'repos.txt', 'r') as f:
         for repo in f:
             _repos.append(repo.strip())
 
     _repos.sort()
 
 
-def add_repo(repo):
+def save_repo(repo):
     """
     Add a new repository to the system
     :param repo: repository to add
@@ -149,8 +164,56 @@ def list_repos():
 
 def write_repo_to_file(data):
     """
+    internal
     Add a new repository to the repository file
     :param data: repository to write
     """
     with open(_repodir + 'repos.txt', 'a+') as f:
+        f.write(data + '\n')
+
+
+def populate_admins():
+    """
+    internal
+    Load the admins from storage into the cache
+    """
+    os.makedirs(_admindir, exist_ok=True)
+
+    with open(_admindir + 'admins.txt', 'r') as f:
+        for admin in f:
+            _admins.append(admin.strip())
+
+    _admins.sort()
+
+
+def save_admin(admin):
+    """
+    Add a new admin to the system
+    :param admin: admin to add
+    """
+    if not _admins:
+        populate_admins()
+
+    write_repo_to_file(admin)
+    _admins.append(admin)
+    _admins.sort()
+
+
+def list_admins():
+    """
+    Get the list of admins
+    :return: the list of admins
+    """
+    if not _admins:
+        populate_admins()
+    return _admins
+
+
+def write_admin_to_file(data):
+    """
+    internal
+    Add a new admin to the admin file
+    :param data: admin to write
+    """
+    with open(_admindir + 'admins.txt', 'a+') as f:
         f.write(data + '\n')

@@ -11,14 +11,10 @@ import slackhub.webhooker   # need to fix circular dependency
 from flask import Flask, abort, request
 from slackbot import settings
 from slackbot.bot import Bot
-from slacker import Slacker
 #from slackhub.webhooker import github_router
 
 # WSGI used for web hooking
 flask = Flask(__name__)
-
-# direct access to the slack API when needed for special actions
-slack = Slacker(settings.API_TOKEN)
 
 logger = logging.getLogger(__name__)
 
@@ -94,19 +90,6 @@ def webhook_sink(token):
     # needs to handle trusted listening to known hosts and maybe just POST
     slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
     return "OK"
-
-
-def get_username(msg):
-    """
-    Get the username from the message body
-    :param msg: message body to parse
-    :return: username from the message
-    """
-    #todo I think this can be moved out and remove the circular dependency since I do not need to hit slack as a service anymore
-    #todo use this as an admin load user call
-    #msguser = json.loads(slack.users.info(msg.body['user']).raw)
-    #return msguser['user']['name']
-    return msg.body['user']
 
 
 # main it up a notch
