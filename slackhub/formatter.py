@@ -1,5 +1,5 @@
 """
-Handles formatting of web hook messages into notification responses.
+Handles formatting of github web hook messages into slack notification responses.
 """
 
 

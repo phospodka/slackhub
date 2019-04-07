@@ -4,7 +4,6 @@ sys.path.append('..')
 
 import logging
 import logging.config
-import json
 import threading
 import slackhub.webhooker   # need to fix circular dependency
 
@@ -31,7 +30,7 @@ def main():
     Function that starts if executing the module
     """
     kw = {
-        'format': '[%(asctime)s] %(message)s',
+        'format': '[%(asctime)s] %(threadName)s : %(levelname)s - %(message)s',
         'datefmt': '%m/%d/%Y %H:%M:%S',
         'level': logging.DEBUG if settings.DEBUG else logging.INFO,
         'stream': sys.stdout,

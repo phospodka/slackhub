@@ -60,7 +60,7 @@ def github_router(event, message):
             _labeled(message)
         elif action == 'opened' or action == 'edited':
             _pull_request(message)
-        elif action == 'closed':
+        elif action == 'closed':  # ? pdh test this
             _pr_closed(message)
         elif action == 'review_requested':
             _pr_review_requested(message)
@@ -92,7 +92,7 @@ def _commit_comment(message):
         for m in mentions:
             body = message.get('comment').get('body')
             if body is not None and m.lower() in body:
-                slackhub.dispatcher.post_message(user, usertype,
+                slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_commit_comment(message, action))
                 break  # only notify once per user
 
@@ -118,7 +118,7 @@ def _issue_comment(message):
         for m in mentions:
             body = message.get('comment').get('body')
             if body is not None and m.lower() in body:
-                slackhub.dispatcher.post_message(user, usertype,
+                slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_issue_comment(message, action))
                 break  # only notify once per user
 
@@ -132,13 +132,11 @@ def _labeled(message):
     # print('labeled: ' + label)
 
     for user, details in slackhub.persister.get_cache().items():
-        usertype = details['type']
         labels = details['label']
 
         for l in labels:
             if l.lower() == label:
-                slackhub.dispatcher.post_message(user, usertype,
-                        slackhub.formatter.github_label(message))
+                slackhub.dispatcher.post_message(user, slackhub.formatter.github_label(message))
                 break  # combine all labels matched if we are returning it? or maybe just not say?
 
 
@@ -153,8 +151,7 @@ def _ping(message):
         usertype = details['type']
 
         if usertype == 'channel':
-            slackhub.dispatcher.post_message(user, usertype,
-                    slackhub.formatter.github_ping(message))
+            slackhub.dispatcher.post_message(user, slackhub.formatter.github_ping(message))
 
 
 def _pull_request(message):
@@ -174,7 +171,7 @@ def _pull_request(message):
         for m in mentions:
             body = message.get('pull_request').get('body')
             if body is not None and m.lower() in body:
-                slackhub.dispatcher.post_message(user, usertype,
+                slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr(message, action))
                 break  # only notify once per user
 
@@ -189,8 +186,7 @@ def _pr_closed(message):
 
         if usertype == 'channel':
             if details['operation']['closed']:
-                slackhub.dispatcher.post_message(user, usertype,
-                                                 slackhub.formatter.github_pr_closed(message))
+                slackhub.dispatcher.post_message(user, slackhub.formatter.github_pr_closed(message))
 
 
 def _pr_assigned(message):
@@ -206,8 +202,7 @@ def _pr_assigned(message):
             username = details['username']
 
             if enabled and username.lower() == message.get('assignee').get('login').lower():
-                slackhub.dispatcher.post_message(user, usertype,
-                        slackhub.formatter.github_pr_assign(message))
+                slackhub.dispatcher.post_message(user, slackhub.formatter.github_pr_assign(message))
 
 
 def _pr_review(message):
@@ -228,7 +223,7 @@ def _pr_review(message):
         for m in mentions:
             body = message.get('review').get('body')
             if body is not None and m.lower() in body:
-                slackhub.dispatcher.post_message(user, usertype,
+                slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr_review(message, action))
                 break  # only notify once per user
 
@@ -250,7 +245,7 @@ def _pr_review_comment(message):
         for m in mentions:
             body = message.get('comment').get('body')
             if body is not None and m.lower() in body:
-                slackhub.dispatcher.post_message(user, usertype,
+                slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr_review_comment(message, action))
                 break  # only notify once per user
 
@@ -269,5 +264,5 @@ def _pr_review_requested(message):
 
             if enabled \
                     and username.lower() == message.get('requested_reviewer').get('login').lower():
-                slackhub.dispatcher.post_message(user, usertype,
+                slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr_review_request(message))

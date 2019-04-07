@@ -7,14 +7,14 @@ updates.  This is done by messaging the bot commands to manage subscriptions to 
 Dependencies
 ------------------------
 
-Relies heavily on [slacker](https://github.com/os/slacker), [slackbot](https://github.com/lins05/slackbot), and
+Relies on [slacker](https://github.com/os/slacker), [slackbot](https://github.com/lins05/slackbot), and
 [flask](https://github.com/pallets/flask) Python projects.
 
 Install the main requirements with:
 
 `pip install -r requirements.txt`
 
-Everything is tested using Python version 3.4
+Everything is tested using Python version 3.5
 
 Getting started
 ------------------------
@@ -57,11 +57,11 @@ Usage
 
 The important commands are:
 
-* add (branch|label|mention) (.*)
-* disable (all|branch|label|mention|review)
-* enable (all|branch|label|mention|review)
-* list (all|branch|enabled|label|mention|username)
-* remove (branch|label|mention) (.*)
+* add (label|mention) (.*)
+* disable (all|label|mention|review)
+* enable (all|label|mention|review)
+* list (all|enabled|label|mention|username)
+* remove (label|mention) (.*)
 * username (.*)
 
 **add** - will add the subscription to the user asking.  It needs the option of what type to
@@ -97,8 +97,6 @@ Plan
 There are a number of items I'd like to do.
 
 * add enabled disable support for the user
-* finish branch subscription functionality
-* add any missing support for mentions
 * add some sort of logging
 * tests ;_;
 * figure out how to make this installable

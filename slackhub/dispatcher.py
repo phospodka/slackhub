@@ -10,14 +10,12 @@ Handles message posting to slack.
 slack = Slacker(settings.API_TOKEN)
 
 
-def post_message(channel, usertype, attachments):
+def post_message(channel, attachments):
     """
     Post the message based off the attachment to user in slack.
     :param channel: user who should receive the message
-    :param usertype: type of user to send to
     :param attachments: array of attachment objects that hold slack's complex formatted message
     """
-    # channel = '@' + channel if usertype == 'user' else channel  # maybe externalise this logic
     slack.chat.post_message(channel,                      # channel / user to message
                             None,                         # plain text to send
                             settings.BOT_NAME,            # username to reply as
@@ -30,5 +28,10 @@ def post_message(channel, usertype, attachments):
 
 
 def get_slack_username(user_id):
+    """
+    Get the username of the slack user by their id
+    :param user_id: id of the user
+    :return: username of the user
+    """
     user = json.loads(slack.users.info(user_id).raw)
     return user['user']['name']

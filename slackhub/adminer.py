@@ -2,6 +2,10 @@ from slackbot.bot import respond_to
 from slackhub.dispatcher import get_slack_username
 from slackhub.persister import save_admin, list_admins
 
+"""
+Handles admin configuration of the system.
+"""
+
 
 @respond_to('add admin (.*)')
 def add_admin(message, admin):
