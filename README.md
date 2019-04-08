@@ -100,3 +100,4 @@ There are a number of items I'd like to do.
 * add some sort of logging
 * tests ;_;
 * figure out how to make this installable
+* hand define the help menu; alter based on admin permission
