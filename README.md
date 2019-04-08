@@ -39,17 +39,22 @@ create the folder and the files in it.
 If all has gone well, you should see some output that looks like:
 
 ```
-[DD/MM/YYYY 00:00:00] Initializing slackbot
-[DD/MM/YYYY 00:00:00] Initializing flask
-[DD/MM/YYYY 00:00:00] loading plugin "slackhub"
-[DD/MM/YYYY 00:00:00] registered respond_to plugin "list_actions" to "list (all|branch|enabled|label|mention|username)"
-[DD/MM/YYYY 00:00:00] registered respond_to plugin "add_actions" to "add (branch|label|mention) (.*)"
-[DD/MM/YYYY 00:00:00] registered respond_to plugin "remove_actions" to "remove (branch|label|mention) (.*)"
-[DD/MM/YYYY 00:00:00] registered respond_to plugin "disable_notifications" to "disable (all|branch|label|mention|review)"
-[DD/MM/YYYY 00:00:00] registered respond_to plugin "enable_notifications" to "enable (all|branch|label|mention|review)"
-[DD/MM/YYYY 00:00:00] registered respond_to plugin "set_username" to "username (.*)"
-[DD/MM/YYYY 00:00:00] connected to slack RTM api
-[DD/MM/YYYY 00:00:00] keep active thread started
+[DD/MM/YYYY 00:00:00] slackd : INFO - Initializing slackbot
+[DD/MM/YYYY 00:00:00] webhookd : INFO - Initializing flask
+[DD/MM/YYYY 00:00:00] slackd : INFO - loading plugin "slackhub"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "add_admin" to "add admin (.*)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "list_admin" to "list admins"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "list_actions" to "list (all|enabled|label|mention|repo|username)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "add_actions" to "add (repo )?(label|mention) (.*)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "add_repo" to "add repo (.*)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "remove_actions" to "remove (repo )?(label|mention) (.*)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "remove_repo" to "remove repo (.*)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "disable_notifications" to "disable (repo )?(all|label|maintainer|mention|pr)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "enable_notifications" to "enable (repo )?(all|label|maintainer|mention|pr|)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "set_username" to "username (.*)"
+[DD/MM/YYYY 00:00:00] slackd : INFO - registered respond_to plugin "list_repositories" to "repos"
+[DD/MM/YYYY 00:00:00] slackd : INFO - connected to slack RTM api
+[DD/MM/YYYY 00:00:00] Dummy-16 : INFO - keep active thread started
 ```
 
 Usage
@@ -101,3 +106,4 @@ There are a number of items I'd like to do.
 * tests ;_;
 * figure out how to make this installable
 * hand define the help menu; alter based on admin permission
+* enhance channel configurations through admin actions
