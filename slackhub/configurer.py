@@ -20,18 +20,21 @@ def list_actions(message, action):
     :param action: what type of information to list
     """
     slack_id = get_user_id(message)
-    data = None
 
     try:
         if action == 'all':
-            data = json.dumps(load_user(slack_id))
+            data = load_user(slack_id)
         else:
-            data = json.dumps(load_user(slack_id)[action])
+            data = load_user(slack_id)[action]
 
     except KeyError:
-        pass
+        data = None
 
-    message.reply('Your settings for [*' + action + '*] are as follows: ' + data)
+    if data is not None:
+        reply = '```' + json.dumps(data, indent=4, sort_keys=True) + '```'
+        message.reply('Your settings for [*' + action + '*] are as follows: ' + reply)
+    else:
+        message.reply('No user data found')
 
 
 @respond_to('add (repo )?(label|mention) (.*)')
