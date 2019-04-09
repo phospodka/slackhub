@@ -38,7 +38,7 @@ def load_user(user):
     :return: user data as a Python object
     """
     if _cache == {}:
-        populate_cache()
+        populate_users()
 
     try:
         return _cache[user]
@@ -55,7 +55,7 @@ def load_user_from_file(user):
     """
     # open the file for reading if it exist, if it does not we are okay with that
     try:
-        with open(_datadir + user, 'r+') as f:
+        with open(_userdir + user, 'r+') as f:
             for line in f:
                 if user in line:
                     return json.loads(line)
@@ -82,21 +82,21 @@ def get_cache():
     :return: the dictionary cache users
     """
     if _cache == {}:
-        populate_cache()
+        populate_users()
     return _cache
 
 
-def populate_cache():
+def populate_users():
     """
     internal
     Walk the persistent file directory and populate the cache
     """
-    os.makedirs(_datadir, exist_ok=True)
+    os.makedirs(_userdir, exist_ok=True)
     # paths = [os.path.join(path, fn) for fn in next(os.walk(path))[2]]
-    usernames = list_users(_datadir)
+    usernames = list_users(_userdir)
 
     for username in usernames:
-        with open(_datadir + username, 'r') as f:
+        with open(_userdir + username, 'r') as f:
             for line in f:
                 user = json.loads(line)
                 _cache[username] = user
@@ -109,7 +109,7 @@ def save_user(data, user):
     :param user: username data belongs to
     """
     if _cache == {}:
-        populate_cache()
+        populate_users()
     _cache[user] = data
     write_user_to_file(data, user)
 
@@ -121,7 +121,7 @@ def write_user_to_file(data, user):
     :param data: data to write
     :param user: user to write data for
     """
-    with open(_datadir + user, 'w') as f:
+    with open(_userdir + user, 'w') as f:
         f.write(json.dumps(data, sort_keys=True))
 
 
