@@ -50,7 +50,7 @@ def add_actions(message, action, target):
     :param target: text that represents what to subscribe to
     """
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    details = get_user_details(slack_id)
 
     try:
         my_set = set(details[action])
@@ -78,21 +78,35 @@ def add_repo_actions(message, name, action, target):
     :param target: text that represents what to subscribe to
     """
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    repo_config = get_repo_config(slack_id, name)
 
-    try:
-        repos = details['repo']
-        for repo in repos:
-            if repo.get('name') == name:
-                my_set = set(repo[action])
-                my_set.add(target)
-                repo[action] = list(my_set)
-    except KeyError:
+    # if the repo is found, add to it
+    # else if repos exist but not the repo, create the repo and add to it
+    # else we need to create the repos list and add to it
+    if repo_config[2]:
+        try:
+            my_set = set(repo_config[2][action])
+            my_set.add(target)
+            repo_config[2][action] = list(my_set)
+        except KeyError:
+            my_set = set()
+            my_set.add(target)
+            repo_config[2][action] = list(my_set)
+    elif repo_config[1]:
+        repo = create_repo(name)
         my_set = set()
         my_set.add(target)
-        details[action] = list(my_set)
+        repo[action] = list(my_set)
+        repo_config[1].append(repo)
+    else:
+        repo = create_repo(name)
+        my_set = set()
+        my_set.add(target)
+        repo[action] = list(my_set)
+        repos = [repo]
+        repo_config[0]['repo'] = repos
 
-    save_user(details, slack_id)
+    save_user(repo_config[0], slack_id)
     message.reply('Subscribed to ' + action + ' [*' + target + '*] in repo *' + name + '*')
 
 
@@ -109,25 +123,17 @@ def add_repo(message, name):
     :param name: repository name to add
     '''
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    repo_config = get_repo_config(slack_id, name)
 
-    try:
-        repos = details['repo']
-        contains = False
-
-        # look to see if the repo is already added
-        for repo in repos:
-            if repo.get('name') == name:
-                contains = True
-
-        # skip if the repo is added so we do not lose settings
-        if not contains:
-            repos.append(create_repo(name))
-    except KeyError:
+    # if we did not found the repo, add it
+    # else if we did not find a repos list, create it and add the repo
+    if not repo_config[2]:
+        repo_config[1].append(create_repo(name))
+    elif not repo_config[1]:
         repos = [create_repo(name)]
-        details['repo'] = repos
+        repo_config[0]['repo'] = repos
 
-    save_user(details, slack_id)
+    save_user(repo_config[0], slack_id)
     message.reply('Subscribed to repository ' + ' [*' + name + '*]')
 
 
@@ -144,15 +150,14 @@ def remove_actions(message, action, target):
     :param target: text that represents what to unsubscribe from
     """
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    details = get_user_details(slack_id)
 
-    if details:
-        try:
-            my_set = set(details[action])
-            my_set.remove(target)
-            details[action] = list(my_set)
-        except KeyError:
-            pass
+    try:
+        my_set = set(details[action])
+        my_set.remove(target)
+        details[action] = list(my_set)
+    except KeyError:
+        pass
 
     save_user(details, slack_id)
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*]')
@@ -171,20 +176,18 @@ def remove_repo_actions(message, name, action, target):
     :param target: text that represents what to unsubscribe from
     """
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    repo_config = get_repo_config(slack_id, name)
 
-    if details:
+    # if the repo was found, remove the requested subscription
+    if repo_config[2]:
         try:
-            repos = details['repo']
-            for repo in repos:
-                if repo.get('name') == name:
-                    my_set = set(repo[action])
-                    my_set.remove(target)
-                    repo[action] = list(my_set)
+            my_set = set(repo_config[2][action])
+            my_set.remove(target)
+            repo_config[2][action] = list(my_set)
         except KeyError:
             pass
 
-    save_user(details, slack_id)
+    save_user(repo_config[0], slack_id)
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*] in repo *' + name + '*')
 
 
@@ -200,20 +203,13 @@ def remove_repo(message, name):
     :param name: repository name to remove
     '''
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    repo_config = get_repo_config(slack_id, name)
 
-    if details:
-        try:
-            repos = details['repo']
+    # if we found the repo, remove it
+    if repo_config[2]:
+        repo_config[1].remove(repo_config[2])
 
-            for repo in repos:
-                if repo.get('name') == name:
-                    repos.remove(repo)
-                    details['repo'] = repos
-        except KeyError:
-            pass
-
-    save_user(details, slack_id)
+    save_user(repo_config[0], slack_id)
     message.reply('Unsubscribed from repository ' + ' [*' + name + '*]')
 
 
@@ -229,17 +225,16 @@ def disable_notifications(message, target):
     :param target: type of notification to disable
     '''
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    details = get_user_details(slack_id)
 
-    if details:
-        try:
-            if target == 'all':
-                for key in details['enabled'].keys():
-                    details['enabled'][key] = False
-            else:
-                details['enabled'][target] = False
-        except KeyError:
-            pass
+    try:
+        if target == 'all':
+            for key in details['enabled'].keys():
+                details['enabled'][key] = False
+        else:
+            details['enabled'][target] = False
+    except KeyError:
+        pass
 
     save_user(details, slack_id)
     message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
@@ -257,17 +252,16 @@ def enable_notifications(message, target):
     :param target: type of notification to enable
     '''
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    details = get_user_details(slack_id)
 
-    if details:
-        try:
-            if target == 'all':
-                for key in details['enabled'].keys():
-                    details['enabled'][key] = True
-            else:
-                details['enabled'][target] = True
-        except KeyError:
-            pass
+    try:
+        if target == 'all':
+            for key in details['enabled'].keys():
+                details['enabled'][key] = True
+        else:
+            details['enabled'][target] = True
+    except KeyError:
+        pass
 
     save_user(details, slack_id)
     message.reply('Enabled [*' + target + '*].  Can be disabled using: disable _' + target + '_')
@@ -285,13 +279,12 @@ def set_username(message, username):
     :param username: github username
     '''
     slack_id = get_user_id(message)
-    details = get_details(slack_id)
+    details = get_user_details(slack_id)
 
-    if details:
-        try:
-            details['username'] = username
-        except KeyError:
-            pass
+    try:
+        details['username'] = username
+    except KeyError:
+        pass
 
     save_user(details, slack_id)
     message.reply('Github username set as [*' + username + '*].')
@@ -316,46 +309,6 @@ def list_repositories(message):
     message.reply('The following repos are being watched:' + reply)
 
 
-def get_details(slack_id):
-    """
-    Get the details about a user and create the template if they do not exist yet
-    :param slack_id: slack username to lookup user by
-    :return: set of details about user
-    """
-    details = load_user(slack_id)
-
-    # if the user does not exist then create the subscription template
-    if not details:
-        details = {'mention': [],
-                   'label': [],
-                   'enabled': {
-                       'label': True,
-                       'mention': True,
-                       'pr': True},
-                   'repo': [],
-                   'type': 'user',
-                   'username': slack_id}  # need a better default maybe?
-
-    return details
-
-
-def check_repo(slack_id, name):
-    details = get_details(slack_id)
-    contains = False
-
-    if details:
-        try:
-            repos = details['repo']
-
-            for repo in repos:
-                if repo.get('name') == name:
-                    contains = True
-        except KeyError:
-            contains = False
-
-    return contains
-
-
 def create_repo(repo):
     """
     Create a repo json structure for the given repository name. Defaults enabled to all except
@@ -374,6 +327,53 @@ def create_repo(repo):
             "maintainer": False
         }
     }
+
+
+def get_repo_config(slack_id, name):
+    """
+    Get the repo config of a repository for a user.  This will be a tuple of the user details, 
+    the repo list, and the requested repo.
+    :param slack_id: user id to get repo config for
+    :param name: repository
+    :return: tuple of ({details}, [repo], repo); None for positions not found
+    """
+    details = get_user_details(slack_id)
+
+    try:
+        repos = details['repo']
+
+        for repo in repos:
+            if repo.get('name') == name:
+                return details, repos, repo
+
+        return details, repos, None
+    except KeyError:
+        pass
+
+    return details, None, None
+
+
+def get_user_details(slack_id):
+    """
+    Get the details about a user and create the template if they do not exist yet
+    :param slack_id: slack username to lookup user by
+    :return: set of details about user; will not return None
+    """
+    details = load_user(slack_id)
+
+    # if the user does not exist then create the subscription template
+    if not details:
+        details = {'mention': [],
+                   'label': [],
+                   'enabled': {
+                       'label': True,
+                       'mention': True,
+                       'pr': True},
+                   'repo': [],
+                   'type': 'user',
+                   'username': slack_id}  # need a better default maybe?
+
+    return details
 
 
 def get_user_id(message):

@@ -122,7 +122,7 @@ def write_user_to_file(data, user):
     :param user: user to write data for
     """
     with open(_datadir + user, 'w') as f:
-        f.write(json.dumps(data))
+        f.write(json.dumps(data, sort_keys=True))
 
 
 def populate_repos():
