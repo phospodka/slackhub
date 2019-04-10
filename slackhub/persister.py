@@ -6,9 +6,6 @@ import sys
 #todo make certain methods private (like write and populate)
 #todo clean deprecated methods
 
-# the all important cache of users; all important.
-_cache = {}
-
 # cache of the admins in the system
 _admins = []
 
@@ -37,11 +34,11 @@ def load_user(user):
     :param user: username to load
     :return: user data as a Python object
     """
-    if _cache == {}:
+    if _users == {}:
         populate_users()
 
     try:
-        return _cache[user]
+        return _users[user]
     except KeyError:
         pass
 
@@ -81,9 +78,9 @@ def get_cache():
     Get the cache of users
     :return: the dictionary cache users
     """
-    if _cache == {}:
+    if _users == {}:
         populate_users()
-    return _cache
+    return _users
 
 
 def populate_users():
@@ -99,7 +96,7 @@ def populate_users():
         with open(_userdir + username, 'r') as f:
             for line in f:
                 user = json.loads(line)
-                _cache[username] = user
+                _users[username] = user
 
 
 def save_user(data, user):
@@ -108,9 +105,9 @@ def save_user(data, user):
     :param data: data to save
     :param user: username data belongs to
     """
-    if _cache == {}:
+    if _users == {}:
         populate_users()
-    _cache[user] = data
+    _users[user] = data
     write_user_to_file(data, user)
 
 
