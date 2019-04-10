@@ -213,7 +213,7 @@ def remove_repo(message, name):
     message.reply('Unsubscribed from repository ' + ' [*' + name + '*]')
 
 
-@respond_to('disable (all|label|maintainer|mention|pr)')
+@respond_to('disable (all|label|mention|pr)')
 def disable_notifications(message, target):
     """
     Disable notifications selectively or for all while preserving settings. e.g. `disable mention`
@@ -240,7 +240,35 @@ def disable_notifications(message, target):
     message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
-@respond_to('enable (all|label|maintainer|mention|pr|)')
+@respond_to('disable repo (\w+) (all|label|maintainer|mention|pr)')
+def disable_repo_notifications(message, name, target):
+    """
+    Disable notifications on a repo selectively or for all while preserving settings. e.g. `disable repo slackhub mention`
+    """
+    '''
+    Disable notifications on a repository for the requesting user.  Preserves settings so they can 
+    be disabled at will.
+    :param message: message body that holds things like the user and how to reply
+    :param target: type of notification to disable
+    '''
+    slack_id = get_user_id(message)
+    repo_config = get_repo_config(slack_id, name)
+
+    try:
+        if target == 'all':
+            for key in repo_config[2]['enabled'].keys():
+                repo_config[2]['enabled'][key] = False
+        else:
+            repo_config[2]['enabled'][target] = False
+    except KeyError:
+        pass
+
+    save_user(repo_config[0], slack_id)
+    message.reply('Disabled [*' + target + '*] on repo ' + name
+                  + '.  Can be re-enabled using: _enable ' + target + '_')
+
+
+@respond_to('enable (all|label|mention|pr)')
 def enable_notifications(message, target):
     """
     Enable notifications selectively or for all while preserving settings. e.g. `enable mention`
@@ -264,7 +292,35 @@ def enable_notifications(message, target):
         pass
 
     save_user(details, slack_id)
-    message.reply('Enabled [*' + target + '*].  Can be disabled using: disable _' + target + '_')
+    message.reply('Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_')
+
+
+@respond_to('enable repo (\w+) (all|label|maintainer|mention|pr|)')
+def enable_repo_notifications(message, name, target):
+    """
+    Enable notifications on a repo selectively or for all while preserving settings. e.g. `enable mention`
+    """
+    '''
+    Enable notifications on a repository for the requesting user.  Preserves settings so they can be 
+    enabled at will.
+    :param message: message body that holds things like the user and how to reply
+    :param target: type of notification to enable
+    '''
+    slack_id = get_user_id(message)
+    repo_config = get_repo_config(slack_id, name)
+
+    try:
+        if target == 'all':
+            for key in repo_config[2]['enabled'].keys():
+                repo_config[2]['enabled'][key] = True
+        else:
+            repo_config[2]['enabled'][target] = True
+    except KeyError:
+        pass
+
+    save_user(repo_config[0], slack_id)
+    message.reply('Enabled [*' + target + '*] on repo ' + name
+                  + '.  Can be disabled using: _disable ' + target + '_')
 
 
 @respond_to('username (\w*)$')
