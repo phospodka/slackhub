@@ -1,4 +1,5 @@
 import json
+import logging
 from slackbot import settings
 from slacker import Slacker
 
@@ -9,6 +10,8 @@ Handles message posting to slack.
 # direct access to the slack API when needed for special actions
 slack = Slacker(settings.API_TOKEN)
 
+logger = logging.getLogger(__name__)
+
 
 def post_message(channel, attachments):
     """
@@ -16,6 +19,7 @@ def post_message(channel, attachments):
     :param channel: user who should receive the message
     :param attachments: array of attachment objects that hold slack's complex formatted message
     """
+    logger.debug('sending to channel [%s]: %s', channel, attachments)
     slack.chat.post_message(channel,                      # channel / user to message
                             None,                         # plain text to send
                             settings.BOT_NAME,            # username to reply as

@@ -1,6 +1,9 @@
-import slackhub.persister  # need to fix circular dependency
+import logging
+import unicodedata
+
 import slackhub.dispatcher
 import slackhub.formatter
+import slackhub.persister  # need to fix circular dependency
 
 # from slackhub.dispatcher import post_message
 # from slackhub.persister import get_cache
@@ -9,8 +12,9 @@ import slackhub.formatter
 Handles web hook requests.
 """
 
+# todo needs a sort of plugin architecture like the slackbot
 
-# needs a sort of plugin architecture like the slackbot
+logger = logging.getLogger(__name__)
 
 
 def github_router(event, message):
@@ -45,8 +49,8 @@ def github_router(event, message):
         want - pr created; all comments created, edited; commit pushed
     '''
     action = message.get('action')
-    print(event + ' - ' + str(action))
-    print(message)
+    logger.debug('%s(%s) - %s', event, action, message)
+
     if event == 'commit_comment':
         if action == 'created':
             _commit_comment(message)
@@ -90,8 +94,7 @@ def _commit_comment(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            body = message.get('comment').get('body')
-            if body is not None and m.lower() in body:
+            if _caseless_contains(m, message.get('comment').get('body')):
                 slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_commit_comment(message, action))
                 break  # only notify once per user
@@ -116,8 +119,7 @@ def _issue_comment(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            body = message.get('comment').get('body')
-            if body is not None and m.lower() in body:
+            if _caseless_contains(m, message.get('comment').get('body')):
                 slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_issue_comment(message, action))
                 break  # only notify once per user
@@ -129,7 +131,6 @@ def _labeled(message):
     :param message: web hook json message from Github
     """
     label = message.get('label').get('name')
-    # print('labeled: ' + label)
 
     for user, details in slackhub.persister.get_cache().items():
         labels = details['label']
@@ -169,8 +170,7 @@ def _pull_request(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            body = message.get('pull_request').get('body')
-            if body is not None and m.lower() in body:
+            if _caseless_contains(m, message.get('pull_request').get('body')):
                 slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr(message, action))
                 break  # only notify once per user
@@ -201,7 +201,7 @@ def _pr_assigned(message):
             enabled = details['enabled']['pr']
             username = details['username']
 
-            if enabled and username.lower() == message.get('assignee').get('login').lower():
+            if enabled and _caseless_equals(username, message.get('assignee').get('login')):
                 slackhub.dispatcher.post_message(user, slackhub.formatter.github_pr_assign(message))
 
 
@@ -221,8 +221,7 @@ def _pr_review(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            body = message.get('review').get('body')
-            if body is not None and m.lower() in body:
+            if _caseless_contains(m, message.get('review').get('body')):
                 slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr_review(message, action))
                 break  # only notify once per user
@@ -243,8 +242,7 @@ def _pr_review_comment(message):
             mentions.append(details['username'])
 
         for m in mentions:
-            body = message.get('comment').get('body')
-            if body is not None and m.lower() in body:
+            if _caseless_contains(m, message.get('comment').get('body')):
                 slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr_review_comment(message, action))
                 break  # only notify once per user
@@ -263,6 +261,37 @@ def _pr_review_requested(message):
             username = details['username']
 
             if enabled \
-                    and username.lower() == message.get('requested_reviewer').get('login').lower():
+                    and _caseless_equals(username, message.get('requested_reviewer').get('login')):
                 slackhub.dispatcher.post_message(user,
                         slackhub.formatter.github_pr_review_request(message))
+
+
+def _normalize(text):
+    """
+    Casefold the unicode text to allow for caseless comparison and normalize prevent variations of
+    accents on letters from mis-matching.
+    :param text: input text to normalize
+    :return: normalized text
+    """
+    return unicodedata.normalize("NFKD", text.casefold())
+
+
+def _caseless_contains(target, source):
+    """
+    Perform a normalized, case insensitive check of whether a target string is contained in a
+    source string.
+    :param target: target string we are looking for
+    :param source: source string we are looking in
+    :return: whether the target string is contained in the source string
+    """
+    return source is not None and _normalize(target) in _normalize(source)
+
+
+def _caseless_equals(left, right):
+    """
+    Perform a normalized, case insensitive equality check
+    :param left: left side of the equals operation
+    :param right: right side of the equals operation
+    :return: whether the two strings are caselessly equal
+    """
+    return _normalize(left) == _normalize(right)

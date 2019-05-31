@@ -1,22 +1,18 @@
-import sys
-# hack for now to include slackhub as a module until I get the egg link working
-sys.path.append('..')
-
 import logging
 import logging.config
+import sys
 import threading
-import slackhub.webhooker   # need to fix circular dependency
+
+# hack for now to include slackhub as a module until I get the egg link working
+sys.path.append('..')
 
 from flask import Flask, abort, request
 from slackbot import settings
 from slackbot.bot import Bot
+
+import slackhub.webhooker  # need to fix circular dependency
+
 #from slackhub.webhooker import github_router
-
-# WSGI used for web hooking
-flask = Flask(__name__)
-
-logger = logging.getLogger(__name__)
-
 
 """
 The slackhub bot.  The program to start to get things trucking.  Make sure to add the API_TOKEN from
@@ -24,13 +20,18 @@ slack to the local_settings.py.  Persistent data for usage subscriptions will be
 folder.  Be sure to have write permissions.
 """
 
+# WSGI used for web hooking
+flask = Flask(__name__)
+
+logger = logging.getLogger(__name__)
+
 
 def main():
     """
     Function that starts if executing the module
     """
     kw = {
-        'format': '[%(asctime)s] %(threadName)s : %(levelname)s - %(message)s',
+        'format': '[%(asctime)s] %(name)s : %(threadName)s : %(levelname)s - %(message)s',
         'datefmt': '%m/%d/%Y %H:%M:%S',
         'level': logging.DEBUG if settings.DEBUG else logging.INFO,
         'stream': sys.stdout,

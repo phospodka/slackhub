@@ -2,6 +2,10 @@ import json
 import os
 import sys
 
+"""
+Handles persisting the various data constructs required by slackhub. 
+"""
+
 #todo condense write actions and populate actions into a single method that takes input
 #todo make certain methods private (like write and populate)
 #todo clean deprecated methods

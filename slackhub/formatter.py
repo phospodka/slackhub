@@ -250,6 +250,10 @@ def github_pr_review_request(message):
 
 
 def github_pr_closed(message):
+    """
+    Formats pull request closed for slack.
+    :return: json formatted slack message
+    """
     return [{
         'fallback': message.get('repository').get('name')
                     + ' Pull request closed by '
