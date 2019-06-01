@@ -1,9 +1,9 @@
 import logging
 import unicodedata
 
-import slackhub.dispatcher
-import slackhub.formatter
-import slackhub.persister  # need to fix circular dependency
+import slackhub.dispatcher as dispatcher
+import slackhub.formatter as formatter
+import slackhub.persister as persister # need to fix circular dependency
 
 # from slackhub.dispatcher import post_message
 # from slackhub.persister import get_cache
@@ -86,18 +86,16 @@ def _commit_comment(message):
     """
     action = ' edited ' if message.get('action') == 'edited' else ' '
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
+        enabled = details['enabled']['mention']
         usertype = details['type']
         mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
 
-        for m in mentions:
-            if _caseless_contains(m, message.get('comment').get('body')):
-                slackhub.dispatcher.post_message(user,
-                        slackhub.formatter.github_commit_comment(message, action))
-                break  # only notify once per user
+        if enabled and _is_mentioned(mentions, message.get('comment').get('body')):
+            dispatcher.post_message(user, formatter.github_commit_comment(message, action))
 
 
 def _issue_comment(message):
@@ -111,18 +109,16 @@ def _issue_comment(message):
     """
     action = ' edited ' if message.get('action') == 'edited' else ' '
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
+        enabled = details['enabled']['mention']
         usertype = details['type']
         mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
 
-        for m in mentions:
-            if _caseless_contains(m, message.get('comment').get('body')):
-                slackhub.dispatcher.post_message(user,
-                        slackhub.formatter.github_issue_comment(message, action))
-                break  # only notify once per user
+        if enabled and _is_mentioned(mentions, message.get('comment').get('body')):
+            dispatcher.post_message(user, formatter.github_issue_comment(message, action))
 
 
 def _labeled(message):
@@ -132,13 +128,15 @@ def _labeled(message):
     """
     label = message.get('label').get('name')
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
+        enabled = details['enabled']['label']
         labels = details['label']
 
-        for l in labels:
-            if l.lower() == label:
-                slackhub.dispatcher.post_message(user, slackhub.formatter.github_label(message))
-                break  # combine all labels matched if we are returning it? or maybe just not say?
+        if enabled:
+            for l in labels:
+                if l.lower() == label:
+                    dispatcher.post_message(user, formatter.github_label(message))
+                    break  # combine all labels matched if we are returning it? or maybe just not say?
 
 
 def _ping(message):
@@ -146,13 +144,13 @@ def _ping(message):
     Handle ping processing.
     :param message: web hook json message from Github
     """
-    slackhub.persister.save_repo(message.get('repository').get('name'))
+    persister.save_repo(message.get('repository').get('name'))
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
         usertype = details['type']
 
         if usertype == 'channel':
-            slackhub.dispatcher.post_message(user, slackhub.formatter.github_ping(message))
+            dispatcher.post_message(user, formatter.github_ping(message))
 
 
 def _pull_request(message):
@@ -162,18 +160,16 @@ def _pull_request(message):
     """
     action = ' edited ' if message.get('action') == 'edited' else ' submitted '
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
+        enabled = details['enabled']['mention']
         usertype = details['type']
         mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
 
-        for m in mentions:
-            if _caseless_contains(m, message.get('pull_request').get('body')):
-                slackhub.dispatcher.post_message(user,
-                        slackhub.formatter.github_pr(message, action))
-                break  # only notify once per user
+        if enabled and _is_mentioned(mentions, message.get('pull_request').get('body')):
+            dispatcher.post_message(user, formatter.github_pr(message, action))
 
 
 def _pr_closed(message):
@@ -181,12 +177,12 @@ def _pr_closed(message):
     Handle processing of pull request closed actions.
     :param message: web hook json message from Github
     """
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
         usertype = details['type']
 
         if usertype == 'channel':
             if details['operation']['closed']:
-                slackhub.dispatcher.post_message(user, slackhub.formatter.github_pr_closed(message))
+                dispatcher.post_message(user, formatter.github_pr_closed(message))
 
 
 def _pr_assigned(message):
@@ -194,7 +190,7 @@ def _pr_assigned(message):
     Handle processing of pull request assigned actions.
     :param message: web hook json message from Github
     """
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
         usertype = details['type']
 
         if usertype == 'user':
@@ -202,7 +198,7 @@ def _pr_assigned(message):
             username = details['username']
 
             if enabled and _caseless_equals(username, message.get('assignee').get('login')):
-                slackhub.dispatcher.post_message(user, slackhub.formatter.github_pr_assign(message))
+                dispatcher.post_message(user, formatter.github_pr_assign(message))
 
 
 def _pr_review(message):
@@ -213,18 +209,16 @@ def _pr_review(message):
     """
     action = ' edited ' if message.get('action') == 'edited' else ' submitted '
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
+        enabled = details['enabled']['mention']
         usertype = details['type']
         mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
 
-        for m in mentions:
-            if _caseless_contains(m, message.get('review').get('body')):
-                slackhub.dispatcher.post_message(user,
-                        slackhub.formatter.github_pr_review(message, action))
-                break  # only notify once per user
+        if enabled and _is_mentioned(mentions, message.get('review').get('body')):
+            dispatcher.post_message(user, formatter.github_pr_review(message, action))
 
 
 def _pr_review_comment(message):
@@ -234,18 +228,16 @@ def _pr_review_comment(message):
     """
     action = ' edited ' if message.get('action') == 'edited' else ' '
 
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
+        enabled = details['enabled']['mention']
         usertype = details['type']
         mentions = list(details['mention'])
 
         if usertype == 'user':
             mentions.append(details['username'])
 
-        for m in mentions:
-            if _caseless_contains(m, message.get('comment').get('body')):
-                slackhub.dispatcher.post_message(user,
-                        slackhub.formatter.github_pr_review_comment(message, action))
-                break  # only notify once per user
+        if enabled and _is_mentioned(mentions, message.get('comment').get('body')):
+            dispatcher.post_message(user, formatter.github_pr_review_comment(message, action))
 
 
 def _pr_review_requested(message):
@@ -253,7 +245,7 @@ def _pr_review_requested(message):
     Handle processing of pull request review request actions.
     :param message: web hook json message from Github
     """
-    for user, details in slackhub.persister.get_cache().items():
+    for user, details in persister.get_cache().items():
         usertype = details['type']
 
         if usertype == 'user':
@@ -262,8 +254,20 @@ def _pr_review_requested(message):
 
             if enabled \
                     and _caseless_equals(username, message.get('requested_reviewer').get('login')):
-                slackhub.dispatcher.post_message(user,
-                        slackhub.formatter.github_pr_review_request(message))
+                dispatcher.post_message(user, formatter.github_pr_review_request(message))
+
+
+def _is_mentioned(mentions, body):
+    """
+    Check the mentions list to see if there is a match in the message body.
+    :param mentions: mentions list to iterate through
+    :param body: message body to for for match in.
+    :return: boolean whether a mention was matched
+    """
+    for m in mentions:
+        if _caseless_contains(m, body):
+            return True
+    return False
 
 
 def _normalize(text):
