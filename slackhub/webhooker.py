@@ -144,13 +144,20 @@ def _ping(message):
     Handle ping processing.
     :param message: web hook json message from Github
     """
-    persister.save_repo(message.get('repository').get('name'))
+    is_repo = message.get('repository')
+    is_org = message.get('organization')
+
+    if is_repo:
+        persister.save_repo(message.get('repository').get('name'))
 
     for user, details in persister.get_cache().items():
         usertype = details['type']
 
         if usertype == 'channel':
-            dispatcher.post_message(user, formatter.github_ping(message))
+            if is_repo:
+                dispatcher.post_message(user, formatter.github_ping_repo(message))
+            elif is_org:
+                dispatcher.post_message(user, formatter.github_ping_org(message))
 
 
 def _pull_request(message):

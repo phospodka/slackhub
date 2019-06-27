@@ -88,9 +88,9 @@ def github_label(message):
     }]
 
 
-def github_ping(message):
+def github_ping_repo(message):
     """
-    Formats github ping for slack.
+    Formats github ping from a repository webhook for slack.
     :return: json formatted slack message
     """
     return [{
@@ -99,6 +99,23 @@ def github_ping(message):
                 + message.get('repository').get('html_url')
                 + '|'
                 + message.get('repository').get('full_name')
+                + '>',
+        'footer': 'Reactor Online. Sensors Online. Weapons Online. All Systems Nominal.'
+    }]
+
+
+def github_ping_org(message):
+    """
+    Formats github ping from an organization webhook for slack.
+    :return: json formatted slack message
+    """
+    return [{
+        'fallback': 'Link established with ' + message.get('organization').get('login'),
+        'text': 'Link established with <'
+                + 'https://github.com/'
+                + message.get('organization').get('login')
+                + '|'
+                + message.get('organization').get('login')
                 + '>',
         'footer': 'Reactor Online. Sensors Online. Weapons Online. All Systems Nominal.'
     }]
