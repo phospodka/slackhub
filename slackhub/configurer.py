@@ -65,7 +65,7 @@ def add_actions(message, action, target):
     message.reply('Subscribed to ' + action + ' [*' + target + '*]')
 
 
-@respond_to('add repo (\w+) (label|mention) (.+)')
+@respond_to('add repo ([\w-]+) (label|mention) (.+)')
 def add_repo_actions(message, name, action, target):
     """
     Add subscriptions of a label, or mention to a repository. e.g. `add repo slackhub mention username`
@@ -110,7 +110,7 @@ def add_repo_actions(message, name, action, target):
     message.reply('Subscribed to ' + action + ' [*' + target + '*] in repo *' + name + '*')
 
 
-@respond_to('add repo (\w+)$')
+@respond_to('add repo ([\w-]+)$')
 def add_repo(message, name):
     """
     Add subscription to a repository. e.g. add repo slackhub
@@ -163,7 +163,7 @@ def remove_actions(message, action, target):
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*]')
 
 
-@respond_to('remove repo (\w+) (label|mention) (.+)')
+@respond_to('remove repo ([\w-]+) (label|mention) (.+)')
 def remove_repo_actions(message, name, action, target):
     """
     Remove subscriptions of a label, or mention from a repository. e.g. `remove repo slackhub mention username`
@@ -191,7 +191,7 @@ def remove_repo_actions(message, name, action, target):
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*] in repo *' + name + '*')
 
 
-@respond_to('remove repo (\w+)$')
+@respond_to('remove repo ([\w-]+)$')
 def remove_repo(message, name):
     """
     Remove subscription to a repository. e.g. remove repo slackhub
@@ -240,7 +240,7 @@ def disable_notifications(message, target):
     message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
-@respond_to('disable repo (\w+) (all|label|maintainer|mention|pr)')
+@respond_to('disable repo ([\w-]+) (all|label|maintainer|mention|pr)')
 def disable_repo_notifications(message, name, target):
     """
     Disable notifications on a repo selectively or for all while preserving settings. e.g. `disable repo slackhub mention`
@@ -295,7 +295,7 @@ def enable_notifications(message, target):
     message.reply('Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_')
 
 
-@respond_to('enable repo (\w+) (all|label|maintainer|mention|pr|)')
+@respond_to('enable repo ([\w-]+) (all|label|maintainer|mention|pr|)')
 def enable_repo_notifications(message, name, target):
     """
     Enable notifications on a repo selectively or for all while preserving settings. e.g. `enable mention`
@@ -323,7 +323,7 @@ def enable_repo_notifications(message, name, target):
                   + '.  Can be disabled using: _disable ' + target + '_')
 
 
-@respond_to('username (\w*)$')
+@respond_to('username ([\w-]+)$')
 def set_username(message, username):
     """
     Set your github username to links notifications to this slack account. e.g. `username batman`

@@ -87,14 +87,9 @@ def _commit_comment(message):
     action = ' edited ' if message.get('action') == 'edited' else ' '
 
     for user, details in persister.get_cache().items():
-        enabled = details['enabled']['mention']
-        usertype = details['type']
-        mentions = list(details['mention'])
-
-        if usertype == 'user':
-            mentions.append(details['username'])
-
-        if enabled and _is_mentioned(mentions, message.get('comment').get('body')):
+        body = message.get('comment').get('body')
+        repo = message.get('repository').get('name')
+        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_commit_comment(message, action))
 
 
@@ -110,14 +105,9 @@ def _issue_comment(message):
     action = ' edited ' if message.get('action') == 'edited' else ' '
 
     for user, details in persister.get_cache().items():
-        enabled = details['enabled']['mention']
-        usertype = details['type']
-        mentions = list(details['mention'])
-
-        if usertype == 'user':
-            mentions.append(details['username'])
-
-        if enabled and _is_mentioned(mentions, message.get('comment').get('body')):
+        body = message.get('comment').get('body')
+        repo = message.get('repository').get('name')
+        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_issue_comment(message, action))
 
 
@@ -168,14 +158,9 @@ def _pull_request(message):
     action = ' edited ' if message.get('action') == 'edited' else ' submitted '
 
     for user, details in persister.get_cache().items():
-        enabled = details['enabled']['mention']
-        usertype = details['type']
-        mentions = list(details['mention'])
-
-        if usertype == 'user':
-            mentions.append(details['username'])
-
-        if enabled and _is_mentioned(mentions, message.get('pull_request').get('body')):
+        body = message.get('pull_request').get('body')
+        repo = message.get('repository').get('name')
+        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr(message, action))
 
 
@@ -217,14 +202,9 @@ def _pr_review(message):
     action = ' edited ' if message.get('action') == 'edited' else ' submitted '
 
     for user, details in persister.get_cache().items():
-        enabled = details['enabled']['mention']
-        usertype = details['type']
-        mentions = list(details['mention'])
-
-        if usertype == 'user':
-            mentions.append(details['username'])
-
-        if enabled and _is_mentioned(mentions, message.get('review').get('body')):
+        body = message.get('review').get('body')
+        repo = message.get('repository').get('name')
+        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr_review(message, action))
 
 
@@ -236,14 +216,9 @@ def _pr_review_comment(message):
     action = ' edited ' if message.get('action') == 'edited' else ' '
 
     for user, details in persister.get_cache().items():
-        enabled = details['enabled']['mention']
-        usertype = details['type']
-        mentions = list(details['mention'])
-
-        if usertype == 'user':
-            mentions.append(details['username'])
-
-        if enabled and _is_mentioned(mentions, message.get('comment').get('body')):
+        body = message.get('comment').get('body')
+        repo = message.get('repository').get('name')
+        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr_review_comment(message, action))
 
 
@@ -262,6 +237,48 @@ def _pr_review_requested(message):
             if enabled \
                     and _caseless_equals(username, message.get('requested_reviewer').get('login')):
                 dispatcher.post_message(user, formatter.github_pr_review_request(message))
+
+
+def _is_global_mentioned(details, body):
+    """
+    Perform the check if a global mention is matched
+    :param details: details to get configured mentions from
+    :param body: message body to check for mentions in
+    :return: boolean whether a mention was found
+    """
+    enabled = details['enabled']['mention']
+    mentions = list(details['mention'])
+    usertype = details['type']
+
+    if usertype == 'user':
+        mentions.append(details['username'])
+
+    return enabled and _is_mentioned(mentions, body)
+
+
+def is_repo_mentioned(details, target_repo, body):
+    """
+    Perform the check if a global mention is matched
+    :param details: details to get configured mentions from
+    :param target_repo: repo to check for configuration in
+    :param body: message body to check for mentions in
+    :return: boolean whether a mention was found
+    """
+    repos = details['repo']
+
+    for repo in repos:
+        if repo['name'] == target_repo:
+            enabled = repo['enabled']['mention']
+            mentions = list(repo['mention'])
+            usertype = details['type']
+
+            if usertype == 'user':
+                mentions.append(details['username'])
+
+            return enabled and _is_mentioned(mentions, body)
+
+    # if we found nothing return false
+    return False
 
 
 def _is_mentioned(mentions, body):
