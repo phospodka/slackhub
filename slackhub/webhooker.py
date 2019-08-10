@@ -89,7 +89,7 @@ def _commit_comment(message):
     for user, details in persister.get_cache().items():
         body = message.get('comment').get('body')
         repo = message.get('repository').get('name')
-        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
+        if _is_global_mentioned(details, body) or _is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_commit_comment(message, action))
 
 
@@ -107,7 +107,7 @@ def _issue_comment(message):
     for user, details in persister.get_cache().items():
         body = message.get('comment').get('body')
         repo = message.get('repository').get('name')
-        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
+        if _is_global_mentioned(details, body) or _is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_issue_comment(message, action))
 
 
@@ -160,7 +160,7 @@ def _pull_request(message):
     for user, details in persister.get_cache().items():
         body = message.get('pull_request').get('body')
         repo = message.get('repository').get('name')
-        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
+        if _is_global_mentioned(details, body) or _is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr(message, action))
 
 
@@ -204,7 +204,7 @@ def _pr_review(message):
     for user, details in persister.get_cache().items():
         body = message.get('review').get('body')
         repo = message.get('repository').get('name')
-        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
+        if _is_global_mentioned(details, body) or _is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr_review(message, action))
 
 
@@ -218,7 +218,7 @@ def _pr_review_comment(message):
     for user, details in persister.get_cache().items():
         body = message.get('comment').get('body')
         repo = message.get('repository').get('name')
-        if _is_global_mentioned(details, body) or is_repo_mentioned(details, repo, body):
+        if _is_global_mentioned(details, body) or _is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr_review_comment(message, action))
 
 
@@ -256,7 +256,7 @@ def _is_global_mentioned(details, body):
     return enabled and _is_mentioned(mentions, body)
 
 
-def is_repo_mentioned(details, target_repo, body):
+def _is_repo_mentioned(details, target_repo, body):
     """
     Perform the check if a global mention is matched
     :param details: details to get configured mentions from
