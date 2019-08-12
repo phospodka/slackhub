@@ -265,7 +265,7 @@ def disable_repo_notifications(message, name, target):
 
     save_user(repo_config[0], slack_id)
     message.reply('Disabled [*' + target + '*] on repo ' + name
-                  + '.  Can be re-enabled using: _enable ' + target + '_')
+                  + '.  Can be re-enabled using: _enable repo ' + name + ' ' + target + '_')
 
 
 @respond_to('enable (all|label|mention|pr)')
@@ -320,7 +320,7 @@ def enable_repo_notifications(message, name, target):
 
     save_user(repo_config[0], slack_id)
     message.reply('Enabled [*' + target + '*] on repo ' + name
-                  + '.  Can be disabled using: _disable ' + target + '_')
+                  + '.  Can be disabled using: _disable repo ' + name + ' ' + target + '_')
 
 
 @respond_to('username ([\w-]+)$')

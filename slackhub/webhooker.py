@@ -54,6 +54,8 @@ def github_router(event, message):
     if event == 'commit_comment':
         if action == 'created':
             _commit_comment(message)
+    elif event == 'gollum':
+        _wiki(message)
     elif event == 'issue_comment':
         if action == 'created' or action == 'edited':
             _issue_comment(message)
@@ -237,6 +239,15 @@ def _pr_review_requested(message):
             if enabled \
                     and _caseless_equals(username, message.get('requested_reviewer').get('login')):
                 dispatcher.post_message(user, formatter.github_pr_review_request(message))
+
+
+def _wiki(message):
+    for user, details in persister.get_cache().items():
+        target_repo = message.get('repository').get('name')
+        repos = details['repo']
+        for repo in repos:
+            if repo['name'] == target_repo and repo['enabled']['maintainer']:
+                dispatcher.post_message(user, formatter.github_wiki(message))
 
 
 def _is_global_mentioned(details, body):

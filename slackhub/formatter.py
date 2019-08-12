@@ -295,3 +295,35 @@ def github_pr_closed(message):
                  + message.get('pull_request').get('title'),
         'title_link': message.get('pull_request').get('html_url')
     }]
+
+
+def github_wiki(message):
+    """
+    Formats wiki updates for slack.
+    :return: json formatted slack message
+    """
+    return [{
+        'fallback': message.get('repository').get('name')
+                    + ' Wiki page '
+                    + message.get('pages')[0].get('title')
+                    + ' '
+                    + message.get('pages')[0].get('action')
+                    + ' by '
+                    + message.get('sender').get('login'),
+        'color': '334F9C',
+        'text': '<'
+                   + message.get('repository').get('html_url')
+                   + '|['
+                   + message.get('repository').get('name')
+                   + ']> Wiki page <'
+                   + message.get('pages')[0].get('html_url')
+                   + '|'
+                   + message.get('pages')[0].get('title')
+                   + '> '
+                   + message.get('pages')[0].get('action')
+                   + ' by <'
+                   + message.get('sender').get('html_url')
+                   + '|'
+                   + message.get('sender').get('login')
+                   + '>'
+    }]
