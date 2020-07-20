@@ -55,7 +55,8 @@ def github_router(event, message):
         if action == 'created':
             _commit_comment(message)
     elif event == 'gollum':
-        _wiki(message)
+        # _wiki(message)
+        pass
     elif event == 'issue_comment':
         if action == 'created' or action == 'edited':
             _issue_comment(message)
@@ -162,7 +163,9 @@ def _pull_request(message):
     for user, details in persister.get_cache().items():
         body = message.get('pull_request').get('body')
         repo = message.get('repository').get('name')
-        if _is_global_mentioned(details, body) or _is_repo_mentioned(details, repo, body):
+        if _is_maintainer(details, repo) \
+                or _is_global_mentioned(details, body) \
+                or _is_repo_mentioned(details, repo, body):
             dispatcher.post_message(user, formatter.github_pr(message, action))
 
 
@@ -244,10 +247,8 @@ def _pr_review_requested(message):
 def _wiki(message):
     for user, details in persister.get_cache().items():
         target_repo = message.get('repository').get('name')
-        repos = details['repo']
-        for repo in repos:
-            if repo['name'] == target_repo and repo['enabled']['maintainer']:
-                dispatcher.post_message(user, formatter.github_wiki(message))
+        if _is_maintainer(details, target_repo):
+            dispatcher.post_message(user, formatter.github_wiki(message))
 
 
 def _is_global_mentioned(details, body):
@@ -287,6 +288,23 @@ def _is_repo_mentioned(details, target_repo, body):
                 mentions.append(details['username'])
 
             return enabled and _is_mentioned(mentions, body)
+
+    # if we found nothing return false
+    return False
+
+
+def _is_maintainer(details, target_repo):
+    """
+    Perform the check if the user is a maintainer of the repo
+    :param details: details of the user to find repo match
+    :param target_repo: repo to check for maintainer flag in
+    :return: boolean whether the user is a maintainer
+    """
+    repos = details['repo']
+
+    for repo in repos:
+        if repo['name'] == target_repo:
+            return repo['enabled']['maintainer']
 
     # if we found nothing return false
     return False
