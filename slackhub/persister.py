@@ -13,6 +13,9 @@ Handles persisting the various data constructs required by slackhub.
 # cache of the admins in the system
 _admins = []
 
+# cache of the channels in the system
+_channels = {}
+
 # cache of the repos being maintained
 _repos = []
 
@@ -25,11 +28,93 @@ _datadir = os.path.dirname(os.path.realpath(sys.argv[0])) + '/data/'
 # directory of the admin data
 _admindir = _datadir + 'admins/'
 
+# directory of the channel data
+_channeldir = _datadir + 'channels/'
+
 # directory of the repository data
 _repodir = _datadir + 'repos/'
 
 # directory of the user data
 _userdir = _datadir + 'users/'
+
+
+def get_cache():
+    """
+    Get the cache of users
+    :return: the dictionary cache users
+    """
+    if _channels == {}:
+        populate_channels()
+    if _users == {}:
+        populate_users()
+    return {**_users, **_channels}  # x | y in 3.9
+
+
+def load_channel(channel):
+    """
+    Load the channel from the cache; populate as necessary
+    :param channel: channel to load
+    :return: channel data as a Python object
+    """
+    if _channels == {}:
+        populate_channels()
+
+    try:
+        return _channels[channel]
+    except KeyError:
+        pass
+
+
+def list_channels(path):
+    """
+    internal
+    Get the list of channels being maintained by the bot
+    :param path: path to search for channels
+    :return: list of channel names
+    """
+    if os.listdir(path):
+        return next(os.walk(path))[2]
+    else:
+        return []
+
+
+def populate_channels():
+    """
+    internal
+    Walk the persistent file directory and populate the cache
+    """
+    os.makedirs(_channeldir, exist_ok=True)
+    # paths = [os.path.join(path, fn) for fn in next(os.walk(path))[2]]
+    names = list_channels(_channeldir)
+
+    for name in names:
+        with open(_channeldir + name, 'r') as f:
+            for line in f:
+                channel = json.loads(line)
+                _channels[name] = channel
+
+
+def save_channel(data, channel):
+    """
+    Save channel to the cache and to persistent file
+    :param data: data to save
+    :param channel: channel data belongs to
+    """
+    if _channels == {}:
+        populate_channels()
+    _channels[channel] = data
+    write_channel_to_file(data, channel)
+
+
+def write_channel_to_file(data, channel):
+    """
+    internal
+    Write the channel json data out to file
+    :param data: data to write
+    :param channel: channel to write data for
+    """
+    with open(_channeldir + channel, 'w') as f:
+        f.write(json.dumps(data, sort_keys=True))
 
 
 def load_user(user):
@@ -75,16 +160,6 @@ def list_users(path):
         return next(os.walk(path))[2]
     else:
         return []
-
-
-def get_cache():
-    """
-    Get the cache of users
-    :return: the dictionary cache users
-    """
-    if _users == {}:
-        populate_users()
-    return _users
 
 
 def populate_users():

@@ -31,6 +31,16 @@ def post_message(channel, attachments):
                             False)                        # unfurl media
 
 
+def get_slack_channel_name(channel_id):
+    """
+    Get the username of the slack user by their id
+    :param channel_id: id of the user
+    :return: username of the user
+    """
+    channel = json.loads(slack.conversations.info(channel_id).raw)
+    return channel['channel']['name']
+
+
 def get_slack_username(user_id):
     """
     Get the username of the slack user by their id
