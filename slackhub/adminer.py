@@ -3,6 +3,7 @@ import json
 from slackbot.bot import respond_to
 
 from slackhub.dispatcher import get_slack_username, get_slack_channel_name
+from slackhub.permissioner import verify_admin
 from slackhub.persister import save_admin, list_admins, load_channel, save_channel
 
 """
@@ -11,6 +12,7 @@ Handles admin configuration of the system.
 
 
 @respond_to('add admin (.*)')
+@verify_admin
 def add_admin(message, admin):
     """
     Add user to the list of admins. e.g. add admin username
@@ -20,11 +22,8 @@ def add_admin(message, admin):
     :param message: message body that holds things like the user and how to reply 
     :param admin: username to add as admin
     """
-    if verify_admin(message):
-        save_admin(admin)
-        message.reply('Admin [*' + admin + '*] has been added.')
-    else:
-        message.reply('Access denied')
+    save_admin(admin)
+    message.reply('Admin [*' + admin + '*] has been added.')
 
 
 @respond_to('list admin')
@@ -43,6 +42,7 @@ def list_admin(message):
 
 
 @respond_to('add channel ([\w-]+) (label|mention) (.+)')
+@verify_admin
 def add_channel_actions(message, channel_id, action, target):
     """
     Add subscriptions of a label, or mention to a channel. e.g. `add channel C012345 mention username`
@@ -55,25 +55,23 @@ def add_channel_actions(message, channel_id, action, target):
     :param action: type of subscription to add (label or mention)
     :param target: text that represents what to subscribe to
     """
-    if verify_admin(message):
-        details = get_channel_details(channel_id)
+    details = get_channel_details(channel_id)
 
-        try:
-            my_set = set(details[action])
-            my_set.add(target)
-            details[action] = list(my_set)
-        except KeyError:
-            my_set = set()
-            my_set.add(target)
-            details[action] = list(my_set)
+    try:
+        my_set = set(details[action])
+        my_set.add(target)
+        details[action] = list(my_set)
+    except KeyError:
+        my_set = set()
+        my_set.add(target)
+        details[action] = list(my_set)
 
-        save_channel(details, channel_id)
-        message.reply('#' + details.get('username') + ' subscribed to ' + action + ' [*' + target + '*]')
-    else:
-        message.reply('Access denied')
+    save_channel(details, channel_id)
+    message.reply('#' + details.get('username') + ' subscribed to ' + action + ' [*' + target + '*]')
 
 
 @respond_to('list channel ([\w-]+) (all|enabled|label|mention|repo|username)')
+@verify_admin
 def list_channel_actions(message, channel_id, action):
     """
     List stored details for a channel. e.g. `list channel C012345 all`
@@ -85,25 +83,24 @@ def list_channel_actions(message, channel_id, action):
     :param channel_id: channel id to lookup information for
     :param action: what type of information to list
     """
-    if verify_admin(message):
-        try:
-            if action == 'all':
-                data = load_channel(channel_id)
-            else:
-                data = load_channel(channel_id)[action]
-
-        except KeyError:
-            data = None
-
-        if data is not None:
-            reply = '```' + json.dumps(data, indent=4, sort_keys=True) + '```'
-            message.reply('Your settings for [*' + action + '*] are as follows: ' + reply)
+    try:
+        if action == 'all':
+            data = load_channel(channel_id)
         else:
-            message.reply('No channel data found')
+            data = load_channel(channel_id)[action]
+
+    except KeyError:
+        data = None
+
+    if data is not None:
+        reply = '```' + json.dumps(data, indent=4, sort_keys=True) + '```'
+        message.reply('Your settings for [*' + action + '*] are as follows: ' + reply)
     else:
-        message.reply('Access denied')
+        message.reply('No channel data found')
+
 
 @respond_to('remove channel ([\w-]+) (label|mention) (.+)')
+@verify_admin
 def remove_actions(message, channel_id, action, target):
     """
     Remove subscriptions of a label, or mention to a channel. e.g. `remove channel C012345 mention username`
@@ -116,20 +113,17 @@ def remove_actions(message, channel_id, action, target):
     :param action: type of subscription to remove (label or mention)
     :param target: text that represents what to unsubscribe from
     """
-    if verify_admin(message):
-        details = get_channel_details(channel_id)
+    details = get_channel_details(channel_id)
 
-        try:
-            my_set = set(details[action])
-            my_set.remove(target)
-            details[action] = list(my_set)
-        except KeyError:
-            pass
+    try:
+        my_set = set(details[action])
+        my_set.remove(target)
+        details[action] = list(my_set)
+    except KeyError:
+        pass
 
-        save_channel(details, channel_id)
-        message.reply('#' + details.get('username') + ' unsubscribed from ' + action + ' [*' + target + '*]')
-    else:
-        message.reply('Access denied')
+    save_channel(details, channel_id)
+    message.reply('#' + details.get('username') + ' unsubscribed from ' + action + ' [*' + target + '*]')
 
 
 def get_channel_details(channel_id):
@@ -154,33 +148,3 @@ def get_channel_details(channel_id):
                    'username': channel}
 
     return details
-
-
-def get_user_id(message):
-    """
-    Get the user id from the message body
-    :param message: message body to parse
-    :return: user id from the message
-    """
-    return message.user['id']
-
-
-def get_username(message):
-    """
-    Get the username from the message body
-    :param message: message body to parse
-    :return: username from the message
-    """
-    return message.user['name']
-
-
-def verify_admin(message):
-    """
-    Verify that the user performing the operation is one of the known admins
-    :param message: message bogy to parse
-    :return: boolean whether user is an admin or not
-    """
-    if get_user_id(message) in list_admins():
-        return True
-    else:
-        return False
