@@ -1,7 +1,11 @@
 import json
 
 from slackbot.bot import respond_to
-from slackhub.persister import list_repos, load_user, save_user
+
+from slackhub.commander import list_user, add_details, add_repo, add_repo_details, remove_details, \
+    remove_repo, remove_repo_details, disable_feature, disable_repo_feature, enable_feature, \
+    enable_repo_feature, save_username
+from slackhub.persister import list_repos, load_user
 
 """
 Handles user configuration of notifications.
@@ -20,15 +24,7 @@ def list_actions(message, action):
     :param action: what type of information to list
     """
     slack_id = get_user_id(message)
-
-    try:
-        if action == 'all':
-            data = load_user(slack_id)
-        else:
-            data = load_user(slack_id)[action]
-
-    except KeyError:
-        data = None
+    data = list_user(slack_id, action)
 
     if data is not None:
         reply = '```' + json.dumps(data, indent=4, sort_keys=True) + '```'
@@ -51,17 +47,7 @@ def add_actions(message, action, target):
     """
     slack_id = get_user_id(message)
     details = get_user_details(slack_id)
-
-    try:
-        my_set = set(details[action])
-        my_set.add(target)
-        details[action] = list(my_set)
-    except KeyError:
-        my_set = set()
-        my_set.add(target)
-        details[action] = list(my_set)
-
-    save_user(details, slack_id)
+    add_details(slack_id, details, action, target)
     message.reply('Subscribed to ' + action + ' [*' + target + '*]')
 
 
@@ -79,39 +65,12 @@ def add_repo_actions(message, name, action, target):
     """
     slack_id = get_user_id(message)
     repo_config = get_repo_config(slack_id, name)
-
-    # if the repo is found, add to it
-    # else if repos exist but not the repo, create the repo and add to it
-    # else we need to create the repos list and add to it
-    if repo_config[2]:
-        try:
-            my_set = set(repo_config[2][action])
-            my_set.add(target)
-            repo_config[2][action] = list(my_set)
-        except KeyError:
-            my_set = set()
-            my_set.add(target)
-            repo_config[2][action] = list(my_set)
-    elif repo_config[1]:
-        repo = create_repo(name)
-        my_set = set()
-        my_set.add(target)
-        repo[action] = list(my_set)
-        repo_config[1].append(repo)
-    else:
-        repo = create_repo(name)
-        my_set = set()
-        my_set.add(target)
-        repo[action] = list(my_set)
-        repos = [repo]
-        repo_config[0]['repo'] = repos
-
-    save_user(repo_config[0], slack_id)
+    add_repo_details(slack_id, repo_config, name, action, target)
     message.reply('Subscribed to ' + action + ' [*' + target + '*] in repo *' + name + '*')
 
 
 @respond_to('add repo ([\w-]+)$')
-def add_repo(message, name):
+def add_repos(message, name):
     """
     Add subscription to a repository. e.g. add repo slackhub
     """
@@ -124,16 +83,7 @@ def add_repo(message, name):
     '''
     slack_id = get_user_id(message)
     repo_config = get_repo_config(slack_id, name)
-
-    # if we did not found the repo, add it
-    # else if we did not find a repos list, create it and add the repo
-    if not repo_config[2]:
-        repo_config[1].append(create_repo(name))
-    elif not repo_config[1]:
-        repos = [create_repo(name)]
-        repo_config[0]['repo'] = repos
-
-    save_user(repo_config[0], slack_id)
+    add_repo(slack_id, repo_config, name)
     message.reply('Subscribed to repository ' + ' [*' + name + '*]')
 
 
@@ -151,15 +101,7 @@ def remove_actions(message, action, target):
     """
     slack_id = get_user_id(message)
     details = get_user_details(slack_id)
-
-    try:
-        my_set = set(details[action])
-        my_set.remove(target)
-        details[action] = list(my_set)
-    except KeyError:
-        pass
-
-    save_user(details, slack_id)
+    remove_details(slack_id, details, action, target)
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*]')
 
 
@@ -177,22 +119,12 @@ def remove_repo_actions(message, name, action, target):
     """
     slack_id = get_user_id(message)
     repo_config = get_repo_config(slack_id, name)
-
-    # if the repo was found, remove the requested subscription
-    if repo_config[2]:
-        try:
-            my_set = set(repo_config[2][action])
-            my_set.remove(target)
-            repo_config[2][action] = list(my_set)
-        except KeyError:
-            pass
-
-    save_user(repo_config[0], slack_id)
+    remove_repo_details(slack_id, repo_config, action, target)
     message.reply('Unsubscribed from ' + action + ' [*' + target + '*] in repo *' + name + '*')
 
 
 @respond_to('remove repo ([\w-]+)$')
-def remove_repo(message, name):
+def remove_repos(message, name):
     """
     Remove subscription to a repository. e.g. remove repo slackhub
     """
@@ -204,12 +136,7 @@ def remove_repo(message, name):
     '''
     slack_id = get_user_id(message)
     repo_config = get_repo_config(slack_id, name)
-
-    # if we found the repo, remove it
-    if repo_config[2]:
-        repo_config[1].remove(repo_config[2])
-
-    save_user(repo_config[0], slack_id)
+    remove_repo(slack_id, repo_config)
     message.reply('Unsubscribed from repository ' + ' [*' + name + '*]')
 
 
@@ -226,17 +153,7 @@ def disable_notifications(message, target):
     '''
     slack_id = get_user_id(message)
     details = get_user_details(slack_id)
-
-    try:
-        if target == 'all':
-            for key in details['enabled'].keys():
-                details['enabled'][key] = False
-        else:
-            details['enabled'][target] = False
-    except KeyError:
-        pass
-
-    save_user(details, slack_id)
+    disable_feature(slack_id, details, target)
     message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
@@ -253,17 +170,7 @@ def disable_repo_notifications(message, name, target):
     '''
     slack_id = get_user_id(message)
     repo_config = get_repo_config(slack_id, name)
-
-    try:
-        if target == 'all':
-            for key in repo_config[2]['enabled'].keys():
-                repo_config[2]['enabled'][key] = False
-        else:
-            repo_config[2]['enabled'][target] = False
-    except KeyError:
-        pass
-
-    save_user(repo_config[0], slack_id)
+    disable_repo_feature(slack_id, repo_config, target)
     message.reply('Disabled [*' + target + '*] on repo ' + name
                   + '.  Can be re-enabled using: _enable repo ' + name + ' ' + target + '_')
 
@@ -281,17 +188,7 @@ def enable_notifications(message, target):
     '''
     slack_id = get_user_id(message)
     details = get_user_details(slack_id)
-
-    try:
-        if target == 'all':
-            for key in details['enabled'].keys():
-                details['enabled'][key] = True
-        else:
-            details['enabled'][target] = True
-    except KeyError:
-        pass
-
-    save_user(details, slack_id)
+    enable_feature(slack_id, details, target)
     message.reply('Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_')
 
 
@@ -308,17 +205,7 @@ def enable_repo_notifications(message, name, target):
     '''
     slack_id = get_user_id(message)
     repo_config = get_repo_config(slack_id, name)
-
-    try:
-        if target == 'all':
-            for key in repo_config[2]['enabled'].keys():
-                repo_config[2]['enabled'][key] = True
-        else:
-            repo_config[2]['enabled'][target] = True
-    except KeyError:
-        pass
-
-    save_user(repo_config[0], slack_id)
+    enable_repo_feature(slack_id, repo_config, target)
     message.reply('Enabled [*' + target + '*] on repo ' + name
                   + '.  Can be disabled using: _disable repo ' + name + ' ' + target + '_')
 
@@ -336,13 +223,7 @@ def set_username(message, username):
     '''
     slack_id = get_user_id(message)
     details = get_user_details(slack_id)
-
-    try:
-        details['username'] = username
-    except KeyError:
-        pass
-
-    save_user(details, slack_id)
+    save_username(slack_id, details)
     message.reply('Github username set as [*' + username + '*].')
 
 
