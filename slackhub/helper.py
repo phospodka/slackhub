@@ -16,9 +16,9 @@ def help_me(message):
     :param message: message body that holds things like the user and how to reply
     """
     if is_admin(message):
-        message.reply(_user_commands())
-    else:
         message.reply(_admin_commands() + _user_commands())
+    else:
+        message.reply(_user_commands())
 
 
 def _admin_commands():
