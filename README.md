@@ -16,6 +16,10 @@ Install the main requirements with:
 
 `pip install -r requirements.txt`
 
+Add slackhub to your path:
+
+`export PYTHONPATH=$PYTHONPATH:/path/to/slackhub`
+
 Everything is tested using Python version 3.5
 
 Getting started

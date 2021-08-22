@@ -3,9 +3,6 @@ import logging.config
 import sys
 import threading
 
-# hack for now to include slackhub as a module until I get the egg link working
-sys.path.append('..')
-
 from flask import Flask, abort, request
 from slackbot import settings
 from slackbot.bot import Bot
