@@ -7,7 +7,6 @@ Handles persisting the various data constructs required by slackhub.
 """
 
 #todo condense write actions and populate actions into a single method that takes input
-#todo make certain methods private (like write and populate)
 #todo clean deprecated methods
 
 # cache of the admins in the system
@@ -44,9 +43,9 @@ def get_cache():
     :return: the dictionary cache users
     """
     if _channels == {}:
-        populate_channels()
+        _populate_channels()
     if _users == {}:
-        populate_users()
+        _populate_users()
     return {**_users, **_channels}  # x | y in 3.9
 
 
@@ -57,7 +56,7 @@ def load_channel(channel):
     :return: channel data as a Python object
     """
     if _channels == {}:
-        populate_channels()
+        _populate_channels()
 
     try:
         return _channels[channel]
@@ -78,7 +77,7 @@ def list_channels(path):
         return []
 
 
-def populate_channels():
+def _populate_channels():
     """
     internal
     Walk the persistent file directory and populate the cache
@@ -101,7 +100,7 @@ def save_channel(data, channel):
     :param channel: channel data belongs to
     """
     if _channels == {}:
-        populate_channels()
+        _populate_channels()
     _channels[channel] = data
     _write_channel_to_file(data, channel)
 
@@ -124,7 +123,7 @@ def load_user(user):
     :return: user data as a Python object
     """
     if _users == {}:
-        populate_users()
+        _populate_users()
 
     try:
         return _users[user]
@@ -162,7 +161,7 @@ def list_users(path):
         return []
 
 
-def populate_users():
+def _populate_users():
     """
     internal
     Walk the persistent file directory and populate the cache
@@ -185,7 +184,7 @@ def save_user(data, user):
     :param user: username data belongs to
     """
     if _users == {}:
-        populate_users()
+        _populate_users()
     _users[user] = data
     _write_user_to_file(data, user)
 
@@ -201,7 +200,7 @@ def _write_user_to_file(data, user):
         f.write(json.dumps(data, sort_keys=True))
 
 
-def populate_repos():
+def _populate_repos():
     """
     internal
     Load the repos from storage into the cache
@@ -221,7 +220,7 @@ def save_repo(repo):
     :param repo: repository to add
     """
     if not _repos:
-        populate_repos()
+        _populate_repos()
 
     _write_repo_to_file(repo)
     _repos.append(repo)
@@ -234,7 +233,7 @@ def list_repos():
     :return: the list of repositories
     """
     if not _repos:
-        populate_repos()
+        _populate_repos()
     return _repos
 
 
@@ -248,7 +247,20 @@ def _write_repo_to_file(data):
         f.write(data + '\n')
 
 
-def populate_admins():
+def delete_admin(admin):
+    """
+    Delete an admin from the system
+    :param admin: admin to remove
+    """
+    if not _admins:
+        _populate_admins()
+
+    _admins.remove(admin)
+    _admins.sort()
+    _rewrite_admins_to_file(_admins)
+
+
+def _populate_admins():
     """
     internal
     Load the admins from storage into the cache
@@ -268,7 +280,7 @@ def save_admin(admin):
     :param admin: admin to add
     """
     if not _admins:
-        populate_admins()
+        _populate_admins()
 
     _write_admin_to_file(admin)
     _admins.append(admin)
@@ -281,8 +293,19 @@ def list_admins():
     :return: the list of admins
     """
     if not _admins:
-        populate_admins()
+        _populate_admins()
     return _admins
+
+
+def _rewrite_admins_to_file(admins):
+    """
+    internal
+    Add a new admin to the admin file
+    :param data: admin to write
+    """
+    with open(_admindir + 'admins.txt', 'w') as f:
+        for admin in admins:
+            f.write(admin + '\n')
 
 
 def _write_admin_to_file(data):

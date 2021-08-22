@@ -7,7 +7,7 @@ from slackhub.commander import list_channel, add_details, add_repo, add_repo_det
     enable_feature, enable_repo_feature
 from slackhub.dispatcher import get_slack_username, get_slack_channel_name
 from slackhub.permissioner import verify_admin
-from slackhub.persister import save_admin, list_admins, load_channel
+from slackhub.persister import delete_admin, save_admin, list_admins, load_channel
 
 """
 Handles admin configuration of the system.
@@ -26,16 +26,29 @@ def add_admin(message, admin):
     message.reply('Admin [*' + admin + '*] has been added.')
 
 
+@respond_to('remove admin (.*)')
+@verify_admin
+def remove_admin(message, admin):
+    """
+    Remove user from the list of admins.  Will throw error if requesting user is not an admin.
+    :param message: message body that holds things like the user and how to reply
+    :param admin: username to remove as admin
+    """
+    delete_admin(admin)
+    message.reply('Admin [*' + admin + '*] has been removed.')
+
+
 @respond_to('list admin')
 def list_admin(message):
     """
     Get the list of current admins.
     :param message: message body that holds things like the user and how to reply 
     """
-    admin_names = []
+    admins = '```'
     for user_id in list_admins():
-        admin_names.append(get_slack_username(user_id))
-    message.reply('Current admins: ' + str(admin_names))
+        admins += '\n' + user_id + ' - ' + get_slack_username(user_id)
+    admins += '```'
+    message.reply('Current admins: ' + admins)
 
 
 @respond_to('list channel ([\\w-]+) (all|enabled|label|mention|repo|username)')
@@ -52,7 +65,7 @@ def list_channel_actions(message, channel_id, action):
 
     if data is not None:
         reply = '```' + json.dumps(data, indent=4, sort_keys=True) + '```'
-        message.reply('Your settings for [*' + action + '*] are as follows: ' + reply)
+        message.reply(channel_id + ' settings for [*' + action + '*] are as follows: ' + reply)
     else:
         message.reply('No channel data found')
 
@@ -70,7 +83,8 @@ def add_channel_actions(message, channel_id, action, target):
     """
     details = _get_channel_details(channel_id)
     add_details(channel_id, details, action, target)
-    message.reply('#' + details.get('username') + ' subscribed to ' + action + ' [*' + target + '*]')
+    message.reply('#' + details.get('username') + ' subscribed to ' + action + ' [*'
+                  + target + '*]')
 
 
 @respond_to('add channel ([\\w-]+) repo ([\\w-]+) (label|mention) (.+)')
@@ -86,7 +100,8 @@ def add_channel_repo_actions(message, channel_id, name, action, target):
     """
     repo_config = _get_channel_repo_config(channel_id, name)
     add_repo_details(channel_id, repo_config, name, action, target)
-    message.reply('Subscribed to ' + action + ' [*' + target + '*] in repo *' + name + '*')
+    message.reply('#' + repo_config[0].get('username') + ' subscribed to ' + action + ' [*'
+                  + target + '*] in repo *' + name + '*')
 
 
 @respond_to('add channel ([\\w-]+) repo ([\\w-]+)$')
@@ -102,7 +117,8 @@ def add_channel_repos(message, channel_id, name):
     """
     repo_config = _get_channel_repo_config(channel_id, name)
     add_repo(channel_id, repo_config, name)
-    message.reply('Subscribed to repository ' + ' [*' + name + '*]')
+    message.reply('#' + repo_config[0].get('username') + ' subscribed to repository ' + ' [*'
+                  + name + '*]')
 
 
 @respond_to('remove channel ([\\w-]+) (label|mention) (.+)')
@@ -118,7 +134,8 @@ def remove_channel_actions(message, channel_id, action, target):
     """
     details = _get_channel_details(channel_id)
     remove_details(channel_id, details, action, target)
-    message.reply('#' + details.get('username') + ' unsubscribed from ' + action + ' [*' + target + '*]')
+    message.reply('#' + details.get('username') + ' unsubscribed from ' + action + ' [*'
+                  + target + '*]')
 
 
 @respond_to('remove channel ([\\w-]+) repo ([\\w-]+) (label|mention) (.+)')
@@ -134,7 +151,8 @@ def remove_channel_repo_actions(message, channel_id, name, action, target):
     """
     repo_config = _get_channel_repo_config(channel_id, name)
     remove_repo_details(channel_id, repo_config, action, target)
-    message.reply('Unsubscribed from ' + action + ' [*' + target + '*] in repo *' + name + '*')
+    message.reply('#' + repo_config[0].get('username') + ' unsubscribed from ' + action
+                  + ' [*' + target + '*] in repo *' + name + '*')
 
 
 @respond_to('remove channel ([\\w-]+) repo ([\\w-]+)$')
@@ -149,7 +167,8 @@ def remove_channel_repos(message, channel_id, name):
     """
     repo_config = _get_channel_repo_config(channel_id, name)
     remove_repo(channel_id, repo_config)
-    message.reply('Unsubscribed from repository ' + ' [*' + name + '*]')
+    message.reply('#' + repo_config[0].get('username') + ' unsubscribed from repository '
+                  + ' [*' + name + '*]')
 
 
 @respond_to('disable channel ([\\w-]+) (all|label|mention|pr)')
@@ -164,7 +183,8 @@ def disable_notifications(message, channel_id, target):
     """
     details = _get_channel_details(channel_id)
     disable_feature(channel_id, details, target)
-    message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
+    message.reply('#' + details.get('username') + ' disabled [*' + target
+                  + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
 @respond_to('disable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr)')
@@ -179,8 +199,8 @@ def disable_repo_notifications(message, channel_id, name, target):
     """
     repo_config = _get_channel_repo_config(channel_id, name)
     disable_repo_feature(channel_id, repo_config, target)
-    message.reply('Disabled [*' + target + '*] on repo ' + name
-                  + '.  Can be re-enabled using: _enable repo ' + name + ' ' + target + '_')
+    message.reply('#' + repo_config[0].get('username') + ' disabled [*' + target + '*] on repo '
+                  + name + '.  Can be re-enabled using: _enable repo ' + name + ' ' + target + '_')
 
 
 @respond_to('enable channel ([\\w-]+) (all|label|mention|pr)')
@@ -195,7 +215,8 @@ def enable_notifications(message, channel_id, target):
     """
     details = _get_channel_details(channel_id)
     enable_feature(channel_id, details, target)
-    message.reply('Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_')
+    message.reply('#' + details.get('username') + ' enabled [*' + target
+                  + '*].  Can be disabled using: _disable ' + target + '_')
 
 
 @respond_to('enable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr)')
@@ -210,8 +231,8 @@ def enable_repo_notifications(message, channel_id, name, target):
     """
     repo_config = _get_channel_repo_config(channel_id, name)
     enable_repo_feature(channel_id, repo_config, target)
-    message.reply('Enabled [*' + target + '*] on repo ' + name
-                  + '.  Can be disabled using: _disable repo ' + name + ' ' + target + '_')
+    message.reply('#' + repo_config[0].get('username') + ' enabled [*' + target + '*] on repo '
+                  + name + '.  Can be disabled using: _disable repo ' + name + ' ' + target + '_')
 
 
 def _get_channel_details(channel_id):

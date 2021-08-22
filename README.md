@@ -50,6 +50,7 @@ If all has gone well, you should see some output that looks like:
 [DD/MM/YYYY 00:00:00] slackbot.manager : slackd : INFO - loading plugin "slackhub"
 [DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "help_me" to "help"
 [DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "add admin (.*)"
+[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "remove admin (.*)"
 [DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "list_admin" to "list admin"
 [DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "list channel ([\w-]+) (all|enabled|label|mention|repo|username)"
 [DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "add channel ([\w-]+) (label|mention) (.+)"
@@ -94,6 +95,7 @@ The important commands are:
 * `enable channel ([\w-]+) (all|label|mention|pr)`
 * `enable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr)`
 * `list channel ([\w-]+) (all|enabled|label|mention|repo|username)`
+* `remove admin (.*)`
 * `remove channel ([\w-]+) (label|mention) (.+)`
 * `remove channel ([\w-]+) repo ([\w-]+) (label|mention) (.+)`
 * `remove channel ([\w-]+) repo ([\w-]+)$`

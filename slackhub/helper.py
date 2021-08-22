@@ -24,7 +24,7 @@ def help_me(message):
 def _admin_commands():
     return ('*Admin commands*\n'
             + '* `add admin (.*)`'
-            + ' - Add user to the list of admins. e.g. `add admin username`\n'
+            + ' - Add user by slack id to the list of admins. e.g. `add admin U056789`\n'
             + '* `add channel ([\\w-]+) (label|mention) (.+)`'
             + ' - Add subscriptions of a label, or mention to a channel. e.g. `add channel C012345 mention username`\n'
             + '* `add channel ([\\w-]+) repo ([\\w-]+) (label|mention) (.+)`'
@@ -41,6 +41,8 @@ def _admin_commands():
             + ' - Enable notifications on a repo selectively or for all while preserving settings. e.g. `enable channel C012345 mention`\n'
             + '* `list channel ([\\w-]+) (all|enabled|label|mention|repo|username)`'
             + ' - List stored details for a channel. e.g. `list channel C012345 all`\n'
+            + '* `remove admin (.*)`'
+            + ' - Remove user by slack id from the list of admins. e.g. `remove admin U056789`\n'
             + '* `remove channel ([\\w-]+) (label|mention) (.+)`'
             + ' - Remove subscriptions of a label, or mention to a channel. e.g. `remove channel C012345 mention username`\n'
             + '* `remove channel ([\\w-]+) repo ([\\w-]+) (label|mention) (.+)`'

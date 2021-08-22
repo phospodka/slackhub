@@ -1,7 +1,7 @@
 import json
 import logging
 from slackbot import settings
-from slacker import Slacker
+from slacker import Slacker, Error
 
 """
 Handles message posting to slack.
@@ -47,5 +47,9 @@ def get_slack_username(user_id):
     :param user_id: id of the user
     :return: username of the user
     """
-    user = json.loads(slack.users.info(user_id).raw)
-    return user['user']['name']
+    try:
+        user = json.loads(slack.users.info(user_id).raw)
+        return user['user']['name']
+    except Error:
+        return 'Not found'
+
