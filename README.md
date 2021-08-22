@@ -121,17 +121,3 @@ License
 -------------------------------
 
 See LICENSE file.  MPL 2.0.
-
-Plan
--------------------------
-
-There are a number of items I'd like to do.
-
-* add better logging
-* tests ;_;
-* figure out how to make this installable
-* move github messages to templates
-* metrics
-* provide docker container
-* convert from bot to app in slack
-* provide wiki
