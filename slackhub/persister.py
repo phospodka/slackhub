@@ -103,10 +103,10 @@ def save_channel(data, channel):
     if _channels == {}:
         populate_channels()
     _channels[channel] = data
-    write_channel_to_file(data, channel)
+    _write_channel_to_file(data, channel)
 
 
-def write_channel_to_file(data, channel):
+def _write_channel_to_file(data, channel):
     """
     internal
     Write the channel json data out to file
@@ -187,10 +187,10 @@ def save_user(data, user):
     if _users == {}:
         populate_users()
     _users[user] = data
-    write_user_to_file(data, user)
+    _write_user_to_file(data, user)
 
 
-def write_user_to_file(data, user):
+def _write_user_to_file(data, user):
     """
     internal
     Write the user json data out to file
@@ -223,7 +223,7 @@ def save_repo(repo):
     if not _repos:
         populate_repos()
 
-    write_repo_to_file(repo)
+    _write_repo_to_file(repo)
     _repos.append(repo)
     _repos.sort()
 
@@ -238,7 +238,7 @@ def list_repos():
     return _repos
 
 
-def write_repo_to_file(data):
+def _write_repo_to_file(data):
     """
     internal
     Add a new repository to the repository file
@@ -270,7 +270,7 @@ def save_admin(admin):
     if not _admins:
         populate_admins()
 
-    write_repo_to_file(admin)
+    _write_admin_to_file(admin)
     _admins.append(admin)
     _admins.sort()
 
@@ -285,7 +285,7 @@ def list_admins():
     return _admins
 
 
-def write_admin_to_file(data):
+def _write_admin_to_file(data):
     """
     internal
     Add a new admin to the admin file

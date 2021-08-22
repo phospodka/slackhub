@@ -1,5 +1,8 @@
-from slackhub.persister import list_repos, load_user, save_user, save_admin, list_admins, \
-    load_channel, save_channel
+from slackhub.persister import load_user, save_user, load_channel, save_channel
+
+"""
+Handles processing commands for users 
+"""
 
 
 def list_channel(slack_id, action):
