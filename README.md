@@ -81,34 +81,34 @@ Usage
 The important commands are:
 
 **Admin Commands**
-* add admin (.*) - Add user to the list of admins. e.g. add admin username
-* add channel ([\w-]+) (label|mention) (.+) - Add subscriptions of a label, or mention to a channel. e.g. add channel C012345 mention username
-* add channel ([\w-]+) repo ([\w-]+) (label|mention) (.+) - Add subscriptions of a label, or mention to a repository. e.g. add channel C012345 repo slackhub mention username
-* add channel ([\w-]+) repo ([\w-]+)$ - Add subscription to a repository. e.g. add channel C012345 repo slackhub
-* disable channel ([\w-]+) (all|label|mention|pr) - Disable notifications selectively or for all while preserving settings. e.g. disable channel C012345 mention
-* disable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr) - Disable notifications on a repo selectively or for all while preserving settings. e.g. disable channel C012345 repo slackhub mention
-* enable channel ([\w-]+) (all|label|mention|pr) - Enable notifications selectively or for all while preserving settings. e.g. enable channel C012345 mention
-* enable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr) - Enable notifications on a repo selectively or for all while preserving settings. e.g. enable channel C012345 mention
-* list channel ([\w-]+) (all|enabled|label|mention|repo|username) - List stored details for a channel. e.g. list channel C012345 all
-* remove channel ([\w-]+) (label|mention) (.+) - Remove subscriptions of a label, or mention to a channel. e.g. remove channel C012345 mention username
-* remove channel ([\w-]+) repo ([\w-]+) (label|mention) (.+) - Remove subscriptions of a label, or mention from a repository. e.g. remove channel C012345 repo slackhub mention username
-* remove channel ([\w-]+) repo ([\w-]+)$ - Remove subscription to a repository. e.g. remove channel C012345 repo slackhub
+* `add admin (.*)` - Add user to the list of admins. e.g. add admin username
+* `add channel ([\w-]+) (label|mention) (.+)` - Add subscriptions of a label, or mention to a channel. e.g. add channel C012345 mention username
+* `add channel ([\w-]+) repo ([\w-]+) (label|mention) (.+)` - Add subscriptions of a label, or mention to a repository. e.g. add channel C012345 repo slackhub mention username
+* `add channel ([\w-]+) repo ([\w-]+)$` - Add subscription to a repository. e.g. add channel C012345 repo slackhub
+* `disable channel ([\w-]+) (all|label|mention|pr)` - Disable notifications selectively or for all while preserving settings. e.g. disable channel C012345 mention
+* `disable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr)` - Disable notifications on a repo selectively or for all while preserving settings. e.g. disable channel C012345 repo slackhub mention
+* `enable channel ([\w-]+) (all|label|mention|pr)` - Enable notifications selectively or for all while preserving settings. e.g. enable channel C012345 mention
+* `enable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr)` - Enable notifications on a repo selectively or for all while preserving settings. e.g. enable channel C012345 mention
+* `list channel ([\w-]+) (all|enabled|label|mention|repo|username)` - List stored details for a channel. e.g. list channel C012345 all
+* `remove channel ([\w-]+) (label|mention) (.+)` - Remove subscriptions of a label, or mention to a channel. e.g. remove channel C012345 mention username
+* `remove channel ([\w-]+) repo ([\w-]+) (label|mention) (.+)` - Remove subscriptions of a label, or mention from a repository. e.g. remove channel C012345 repo slackhub mention username
+* `remove channel ([\w-]+) repo ([\w-]+)$` - Remove subscription to a repository. e.g. remove channel C012345 repo slackhub
 
 **User Commands**
-* add (label|mention) (.+) - Add subscriptions of a label, or mention. e.g. add mention username
-* add repo ([\w-]+) (label|mention) (.+) - Add subscriptions of a label, or mention to a repository. e.g. add repo slackhub mention username
-* add repo ([\w-]+)$ - Add subscription to a repository. e.g. add repo slackhub
-* disable (all|label|mention|pr) - Disable notifications selectively or for all while preserving settings. e.g. disable mention
-* disable repo ([\w-]+) (all|label|maintainer|mention|pr) - Disable notifications on a repo selectively or for all while preserving settings. e.g. disable repo slackhub mention
-* enable (all|label|mention|pr) - Enable notifications selectively or for all while preserving settings. e.g. enable mention
-* enable repo ([\w-]+) (all|label|maintainer|mention|pr) - Enable notifications on a repo selectively or for all while preserving settings. e.g. enable mention
-* list admin - List current admins. e.g. list admin
-* list (all|enabled|label|mention|repo|username) - List stored details for a user. e.g. list mention
-* remove (label|mention) (.+) - Remove subscriptions of a label, or mention. e.g. remove mention username
-* remove repo ([\w-]+) (label|mention) (.+) - Remove subscriptions of a label, or mention from a repository. e.g. remove repo slackhub mention username
-* remove repo ([\w-]+)$ - Remove subscription to a repository. e.g. remove repo slackhub
-* repos - List the repositories being watched
-* username ([\w-]+)$ - Set your github username to links notifications to this slack account. e.g. username batman
+* `add (label|mention) (.+)` - Add subscriptions of a label, or mention. e.g. add mention username
+* `add repo ([\w-]+) (label|mention) (.+)` - Add subscriptions of a label, or mention to a repository. e.g. add repo slackhub mention username
+* `add repo ([\w-]+)$` - Add subscription to a repository. e.g. add repo slackhub
+* `disable (all|label|mention|pr)` - Disable notifications selectively or for all while preserving settings. e.g. disable mention
+* `disable repo ([\w-]+) (all|label|maintainer|mention|pr)` - Disable notifications on a repo selectively or for all while preserving settings. e.g. disable repo slackhub mention
+* `enable (all|label|mention|pr)` - Enable notifications selectively or for all while preserving settings. e.g. enable mention
+* `enable repo ([\w-]+) (all|label|maintainer|mention|pr)` - Enable notifications on a repo selectively or for all while preserving settings. e.g. enable mention
+* `list admin` - List current admins. e.g. list admin
+* `list (all|enabled|label|mention|repo|username)` - List stored details for a user. e.g. list mention
+* `remove (label|mention) (.+)` - Remove subscriptions of a label, or mention. e.g. remove mention username
+* `remove repo ([\w-]+) (label|mention) (.+)` - Remove subscriptions of a label, or mention from a repository. e.g. remove repo slackhub mention username
+* `remove repo ([\w-]+)$` - Remove subscription to a repository. e.g. remove repo slackhub
+* `repos` - List the repositories being watched
+* `username ([\w-]+)$` - Set your github username to links notifications to this slack account. e.g. username batman
 
 
 License
