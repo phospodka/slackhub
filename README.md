@@ -85,6 +85,9 @@ Usage
 
 The important commands are:
 
+**Setup Commands**
+* `init`
+
 **Admin Commands**
 * `add admin (.*)`
 * `add channel ([\w-]+) (label|mention) (.+)`

@@ -39,6 +39,8 @@ def _admin_commands():
             + ' - Enable notifications selectively or for all while preserving settings. e.g. `enable channel C012345 mention`\n'
             + '* `enable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr)`'
             + ' - Enable notifications on a repo selectively or for all while preserving settings. e.g. `enable channel C012345 mention`\n'
+            + '* `init`'
+            + ' - if all admins have been removed `init` can be ran to add the first admin'
             + '* `list channel ([\\w-]+) (all|enabled|label|mention|repo|username)`'
             + ' - List stored details for a channel. e.g. `list channel C012345 all`\n'
             + '* `remove admin (.*)`'

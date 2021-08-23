@@ -267,9 +267,12 @@ def _populate_admins():
     """
     os.makedirs(_admindir, exist_ok=True)
 
-    with open(_admindir + 'admins.txt', 'r') as f:
-        for admin in f:
-            _admins.append(admin.strip())
+    try:
+        with open(_admindir + 'admins.txt', 'r') as f:
+            for admin in f:
+                _admins.append(admin.strip())
+    except FileNotFoundError:
+        pass
 
     _admins.sort()
 
