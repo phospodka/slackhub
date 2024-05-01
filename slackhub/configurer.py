@@ -134,7 +134,7 @@ def disable_notifications(message, target):
     message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
-@respond_to('disable repo ([\\w-]+) (all|label|maintainer|mention|pr)')
+@respond_to('disable repo ([\\w-]+) (all|label|maintainer|mention|pr|prefix)')
 def disable_repo_notifications(message, name, target):
     """
     Disable notifications on a repository for the requesting user.  Preserves settings so they can 
@@ -163,7 +163,7 @@ def enable_notifications(message, target):
     message.reply('Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_')
 
 
-@respond_to('enable repo ([\\w-]+) (all|label|maintainer|mention|pr)')
+@respond_to('enable repo ([\\w-]+) (all|label|maintainer|mention|pr|prefix)')
 def enable_repo_notifications(message, name, target):
     """
     Enable notifications on a repository for the requesting user.  Preserves settings so they can be 
