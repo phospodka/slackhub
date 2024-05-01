@@ -187,7 +187,7 @@ def disable_notifications(message, channel_id, target):
                   + '*].  Can be re-enabled using: _enable ' + target + '_')
 
 
-@respond_to('disable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr)')
+@respond_to('disable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr|prefix)')
 @verify_admin
 def disable_repo_notifications(message, channel_id, name, target):
     """
@@ -219,7 +219,7 @@ def enable_notifications(message, channel_id, target):
                   + '*].  Can be disabled using: _disable ' + target + '_')
 
 
-@respond_to('enable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr)')
+@respond_to('enable channel ([\\w-]+) repo ([\\w-]+) (all|label|maintainer|mention|pr|prefix)')
 @verify_admin
 def enable_repo_notifications(message, channel_id, name, target):
     """
