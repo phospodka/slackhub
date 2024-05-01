@@ -68,7 +68,8 @@ def github_router(event, message):
         elif action == 'opened' or action == 'edited':
             _pull_request(message)
         elif action == 'closed':  # ? pdh test this
-            _pr_closed(message)
+            # _pr_closed(message)
+            pass
         elif action == 'review_requested':
             _pr_review_requested(message)
         elif action == 'assigned':
@@ -279,7 +280,7 @@ def _is_repo_mentioned(details, target_repo, body):
     repos = details['repo']
 
     for repo in repos:
-        if repo['name'] == target_repo:
+        if _is_repo_match(repo, target_repo):
             enabled = repo['enabled']['mention']
             mentions = list(repo['mention'])
             usertype = details['type']
@@ -303,7 +304,7 @@ def _is_maintainer(details, target_repo):
     repos = details['repo']
 
     for repo in repos:
-        if repo['name'] == target_repo:
+        if _is_repo_match(repo, target_repo):
             return repo['enabled']['maintainer']
 
     # if we found nothing return false
@@ -321,6 +322,21 @@ def _is_mentioned(mentions, body):
         if _caseless_contains(m, body):
             return True
     return False
+
+
+def _is_repo_match(repo, target_repo):
+    """
+    Check if the repo details is a match for a target repo from a message
+    :param repo: repo config to get match parameters for
+    :param target_repo: repo to check that we match
+    :return: boolean whether repo matches the target repo
+    """
+    repo_name = repo['name']
+    prefix = repo['enabled']['prefix']
+    if prefix:
+        return target_repo.startswith(repo_name)
+    else:
+        return repo_name == target_repo
 
 
 def _normalize(text):

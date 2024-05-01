@@ -121,7 +121,7 @@ def remove_repo_details(slack_id, repo_config, action, target):
 def _create_repo(repo):
     """
     Create a repo json structure for the given repository name. Defaults enabled to all except
-    maintainer.
+    maintainer and prefix.
     :param repo: repository name to create json structure for
     :return: a new repo json object
     """
@@ -131,9 +131,10 @@ def _create_repo(repo):
         "label": [],
         "enabled": {
             "label": True,
-            "pr": True,
             "mention": True,
-            "maintainer": False
+            "maintainer": False,
+            "pr": True,
+            "prefix": False
         }
     }
 
