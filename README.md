@@ -9,7 +9,7 @@ channels.
 Dependencies
 ------------------------
 
-Relies on [slacker](https://github.com/os/slacker), [slackbot](https://github.com/lins05/slackbot), and
+Relies on [slack-bolt](https://github.com/slackapi/bolt-python), [slack-sdk](https://github.com/slackapi/python-slack-sdk), and
 [flask](https://github.com/pallets/flask) Python projects.
 
 Install the main requirements with:
@@ -20,12 +20,20 @@ Add slackhub to your path:
 
 `export PYTHONPATH=$PYTHONPATH:/path/to/slackhub`
 
-Everything is tested using Python version 3.5
+Everything is tested using Python version 3.12
 
 Getting started
 ------------------------
 
-After downloading and installing the requirements you will want to edit a couple of the config items in **slackbot_settings.py**.
+Before running you will want to create a `.env` file
+```python
+DEBUG = True  # flag to globally enable debug logging  
+DEFAULT_REPLY = "Heyo!  Please type `help` for a list of commands."
+SLACK_APP_TOKEN = 'app_token'  # app token for this slack app 
+SLACK_BOT_TOKEN = 'bot_token'  # bot user token for this app for your workspace
+SLACKHUB_TOKEN = '12345B'  # token to use as part of the url for web hooks
+WEBHOOK_ENABLED = True   # flag to enable the webhook accepting events
+```
 * API_TOKEN - create a bot in slack and generate a token to use here.  This is what allows the bot to communicate with slack.
 * BOT_NAME - set the name of the bot you created in slack here.  This allows this code to send notifications to the bot.
 * SLACKHUB_TOKEN - set this to your favorite random string.  This will be used as part of the URL for the webhook sink for github.
@@ -46,38 +54,13 @@ If all has gone well, you should see some output that looks like:
 
 ```
 [DD/MM/YYYY 00:00:00] slackd : INFO - Initializing slackbot
-[DD/MM/YYYY 00:00:00] webhookd : INFO - Initializing flask
-[DD/MM/YYYY 00:00:00] slackbot.manager : slackd : INFO - loading plugin "slackhub"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "help_me" to "help"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "add admin (.*)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "remove admin (.*)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "list_admin" to "list admin"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "list channel ([\w-]+) (all|enabled|label|mention|repo|username)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "add channel ([\w-]+) (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "add channel ([\w-]+) repo ([\w-]+) (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "add channel ([\w-]+) repo ([\w-]+)$"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "remove channel ([\w-]+) (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "remove channel ([\w-]+) repo ([\w-]+) (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "remove channel ([\w-]+) repo ([\w-]+)$"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "disable channel ([\w-]+) (all|label|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "disable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "enable channel ([\w-]+) (all|label|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "decorated" to "enable channel ([\w-]+) repo ([\w-]+) (all|label|maintainer|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "list_actions" to "list (all|enabled|label|mention|repo|username)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "add_actions" to "add (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "add_repo_actions" to "add repo ([\w-]+) (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "add_repos" to "add repo ([\w-]+)$"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "remove_actions" to "remove (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "remove_repo_actions" to "remove repo ([\w-]+) (label|mention) (.+)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "remove_repos" to "remove repo ([\w-]+)$"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "disable_notifications" to "disable (all|label|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "disable_repo_notifications" to "disable repo ([\w-]+) (all|label|maintainer|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "enable_notifications" to "enable (all|label|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "enable_repo_notifications" to "enable repo ([\w-]+) (all|label|maintainer|mention|pr)"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "set_username" to "username ([\w-]+)$"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - registered respond_to plugin "list_repositories" to "repos"
-[DD/MM/YYYY 00:00:00] slackbot.bot : slackd : INFO - connected to slack RTM api
-[DD/MM/YYYY 00:00:00] slackbot.bot : Dummy-1 : INFO - keep active thread started
+[DD/MM/YYYY 00:00:00] __main__ : slackd : INFO - Initializing slackbot
+[DD/MM/YYYY 00:00:00] __main__ : webhookd : INFO - Initializing flask
+ * Serving Flask app 'slackhubbot'
+ * Debug mode: off
+[DD/MM/YYYY 00:00:00] slack_bolt.App : slackd : INFO - A new session has been established (session id: 10011001-2222-3333-4444-556677889900)
+[DD/MM/YYYY 00:00:00] slack_bolt.App : slackd : INFO - ⚡️ Bolt app is running!
+[DD/MM/YYYY 00:00:00] slack_bolt.App : Thread-1 (_run) : INFO - Starting to receive messages from a new connection (session id: 10011001-2222-3333-4444-556677889900)
 ```
 
 Usage

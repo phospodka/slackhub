@@ -1,4 +1,4 @@
-flask>= 1.1.2
-slacker>=0.14.0
-slackbot>=1.1.0
-slack-sdk>=3.18.1
+flask>= 3.1.0
+python-dotenv>=1.0.1
+slack-bolt>=1.22.0
+slack-sdk>=3.34.0

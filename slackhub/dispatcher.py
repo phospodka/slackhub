@@ -1,14 +1,19 @@
-import json
 import logging
-from slackbot import settings
-from slacker import Slacker, Error
+from dotenv import load_dotenv
+from slack_sdk import WebClient
+
+import slackhub.utiler as utiler
 
 """
 Handles message posting to slack.
 """
 
+# load env needs to be called here because reasons? Maybe because flask is distributing messages to their own thread?
+load_dotenv()
+
 # direct access to the slack API when needed for special actions
-slack = Slacker(settings.API_TOKEN)
+slack_token = utiler.get_env('SLACK_BOT_TOKEN')
+client = WebClient(token=slack_token)
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +25,11 @@ def post_message(channel, attachments):
     :param attachments: array of attachment objects that hold slack's complex formatted message
     """
     logger.debug('sending to channel [%s]: %s', channel, attachments)
-    slack.chat.post_message(channel,                      # channel / user to message
-                            None,                         # plain text to send
-                            settings.BOT_NAME,            # username to reply as
-                            settings.BOT_NAME,            # as user to masquerade as
-                            None,                         # parse
-                            None,                         # link names
-                            attachments,                  # attachments for fancy text
-                            False,                        # unfurl links
-                            False)                        # unfurl media
+
+    client.chat_postMessage(channel=channel,
+                            attachments=attachments,
+                            unfurl_links=False,
+                            unfurl_media=False)
 
 
 def get_slack_channel_name(channel_id):
@@ -37,7 +38,7 @@ def get_slack_channel_name(channel_id):
     :param channel_id: id of the user
     :return: username of the user
     """
-    channel = json.loads(slack.conversations.info(channel_id).raw)
+    channel = client.conversations_info(channel=channel_id)
     return channel['channel']['name']
 
 
@@ -47,9 +48,5 @@ def get_slack_username(user_id):
     :param user_id: id of the user
     :return: username of the user
     """
-    try:
-        user = json.loads(slack.users.info(user_id).raw)
-        return user['user']['name']
-    except Error:
-        return 'Not found'
-
+    user = client.users_info(user=user_id)
+    return user['user']['name']

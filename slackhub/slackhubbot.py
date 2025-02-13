@@ -3,11 +3,13 @@ import logging.config
 import sys
 import threading
 
+from dotenv import load_dotenv
 from flask import Flask, abort, request
-from slackbot import settings
-from slackbot.bot import Bot
+from slack_bolt import App
+from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-import slackhub.webhooker  # need to fix circular dependency
+import slackhub.utiler as utiler
+import slackhub.webhooker as webhooker # need to fix circular dependency
 
 #from slackhub.webhooker import github_router
 
@@ -16,6 +18,9 @@ The slackhub bot.  The program to start to get things trucking.  Make sure to ad
 slack to the local_settings.py.  Persistent data for usage subscriptions will be saved to the ./data
 folder.  Be sure to have write permissions.
 """
+
+# load the env to get environment variables from the .env file
+load_dotenv()
 
 # WSGI used for web hooking
 flask = Flask(__name__)
@@ -30,7 +35,7 @@ def main():
     kw = {
         'format': '[%(asctime)s] %(name)s : %(threadName)s : %(levelname)s - %(message)s',
         'datefmt': '%m/%d/%Y %H:%M:%S',
-        'level': logging.DEBUG if settings.DEBUG else logging.INFO,
+        'level': logging.DEBUG if utiler.get_bool('DEBUG') else logging.INFO,
         'stream': sys.stdout,
         }
     logging.basicConfig(**kw)
@@ -57,8 +62,8 @@ def slackbot_init():
     Thread target for initializing slackbot
     """
     logger.info('Initializing slackbot')
-    bot = Bot()
-    bot.run()
+    app = App(token=utiler.get_env("SLACK_BOT_TOKEN"))
+    SocketModeHandler(app, utiler.get_env("SLACK_APP_TOKEN")).start()
 
 
 def webhook_init():
@@ -80,12 +85,12 @@ def webhook_sink(token):
     :param token: SLACKHUB_TOKEN parsed from the end of the request URL
     :return: a http status code dependent on success or failure
     """
-    if settings.SLACKHUB_TOKEN != token or not settings.WEBHOOK_ENABLED:
+    if utiler.get_env('SLACKHUB_TOKEN') != token or not utiler.get_bool('WEBHOOK_ENABLED'):
         abort(403)
     elif request.method == 'GET':
         return 'boop'
     # needs to handle trusted listening to known hosts and maybe just POST
-    slackhub.webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
+    webhooker.github_router(request.headers.environ['HTTP_X_GITHUB_EVENT'], request.json)
     return "OK"
 
 
