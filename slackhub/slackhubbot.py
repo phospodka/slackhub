@@ -5,9 +5,8 @@ import threading
 
 from dotenv import load_dotenv
 from flask import Flask, abort, request
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
 
+import slackhub.bolter as bolter
 import slackhub.utiler as utiler
 import slackhub.webhooker as webhooker # need to fix circular dependency
 
@@ -62,8 +61,7 @@ def slackbot_init():
     Thread target for initializing slackbot
     """
     logger.info('Initializing slackbot')
-    app = App(token=utiler.get_env("SLACK_BOT_TOKEN"))
-    SocketModeHandler(app, utiler.get_env("SLACK_APP_TOKEN")).start()
+    bolter.start()
 
 
 def webhook_init():

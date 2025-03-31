@@ -1,11 +1,10 @@
 import json
 
-from slackbot.bot import respond_to
-
 from slackhub.commander import list_user, add_details, add_repo, add_repo_details, remove_details, \
     remove_repo, remove_repo_details, disable_feature, disable_repo_feature, enable_feature, \
     enable_repo_feature, save_username
 from slackhub.permissioner import get_user_id
+from slackhub.patterner import respond_to
 from slackhub.persister import list_repos, load_user
 
 """
@@ -26,9 +25,9 @@ def list_actions(message, action):
 
     if data is not None:
         reply = '```' + json.dumps(data, indent=4, sort_keys=True) + '```'
-        message.reply('Your settings for [*' + action + '*] are as follows: ' + reply)
+        return 'Your settings for [*' + action + '*] are as follows: ' + reply
     else:
-        message.reply('No user data found')
+        return 'No user data found'
 
 
 @respond_to('add (label|mention) (.+)')
@@ -43,7 +42,7 @@ def add_actions(message, action, target):
     slack_id = get_user_id(message)
     details = _get_user_details(slack_id)
     add_details(slack_id, details, action, target)
-    message.reply('Subscribed to ' + action + ' [*' + target + '*]')
+    return 'Subscribed to ' + action + ' [*' + target + '*]'
 
 
 @respond_to('add repo ([\\w-]+) (label|mention) (.+)')
@@ -58,7 +57,7 @@ def add_repo_actions(message, name, action, target):
     slack_id = get_user_id(message)
     repo_config = _get_repo_config(slack_id, name)
     add_repo_details(slack_id, repo_config, name, action, target)
-    message.reply('Subscribed to ' + action + ' [*' + target + '*] in repo *' + name + '*')
+    return 'Subscribed to ' + action + ' [*' + target + '*] in repo *' + name + '*'
 
 
 @respond_to('add repo ([\\w-]+)$')
@@ -73,7 +72,7 @@ def add_repos(message, name):
     slack_id = get_user_id(message)
     repo_config = _get_repo_config(slack_id, name)
     add_repo(slack_id, repo_config, name)
-    message.reply('Subscribed to repository ' + ' [*' + name + '*]')
+    return 'Subscribed to repository ' + ' [*' + name + '*]'
 
 
 @respond_to('remove (label|mention) (.+)')
@@ -88,7 +87,7 @@ def remove_actions(message, action, target):
     slack_id = get_user_id(message)
     details = _get_user_details(slack_id)
     remove_details(slack_id, details, action, target)
-    message.reply('Unsubscribed from ' + action + ' [*' + target + '*]')
+    return 'Unsubscribed from ' + action + ' [*' + target + '*]'
 
 
 @respond_to('remove repo ([\\w-]+) (label|mention) (.+)')
@@ -103,7 +102,7 @@ def remove_repo_actions(message, name, action, target):
     slack_id = get_user_id(message)
     repo_config = _get_repo_config(slack_id, name)
     remove_repo_details(slack_id, repo_config, action, target)
-    message.reply('Unsubscribed from ' + action + ' [*' + target + '*] in repo *' + name + '*')
+    return 'Unsubscribed from ' + action + ' [*' + target + '*] in repo *' + name + '*'
 
 
 @respond_to('remove repo ([\\w-]+)$')
@@ -117,7 +116,7 @@ def remove_repos(message, name):
     slack_id = get_user_id(message)
     repo_config = _get_repo_config(slack_id, name)
     remove_repo(slack_id, repo_config)
-    message.reply('Unsubscribed from repository ' + ' [*' + name + '*]')
+    return 'Unsubscribed from repository ' + ' [*' + name + '*]'
 
 
 @respond_to('disable (all|label|mention|pr)')
@@ -131,7 +130,7 @@ def disable_notifications(message, target):
     slack_id = get_user_id(message)
     details = _get_user_details(slack_id)
     disable_feature(slack_id, details, target)
-    message.reply('Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_')
+    return 'Disabled [*' + target + '*].  Can be re-enabled using: _enable ' + target + '_'
 
 
 @respond_to('disable repo ([\\w-]+) (all|label|maintainer|mention|pr|prefix)')
@@ -145,8 +144,8 @@ def disable_repo_notifications(message, name, target):
     slack_id = get_user_id(message)
     repo_config = _get_repo_config(slack_id, name)
     disable_repo_feature(slack_id, repo_config, target)
-    message.reply('Disabled [*' + target + '*] on repo ' + name
-                  + '.  Can be re-enabled using: _enable repo ' + name + ' ' + target + '_')
+    return 'Disabled [*' + target + '*] on repo ' + name\
+           + '.  Can be re-enabled using: _enable repo ' + name + ' ' + target + '_'
 
 
 @respond_to('enable (all|label|mention|pr)')
@@ -160,7 +159,7 @@ def enable_notifications(message, target):
     slack_id = get_user_id(message)
     details = _get_user_details(slack_id)
     enable_feature(slack_id, details, target)
-    message.reply('Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_')
+    return 'Enabled [*' + target + '*].  Can be disabled using: _disable ' + target + '_'
 
 
 @respond_to('enable repo ([\\w-]+) (all|label|maintainer|mention|pr|prefix)')
@@ -174,8 +173,8 @@ def enable_repo_notifications(message, name, target):
     slack_id = get_user_id(message)
     repo_config = _get_repo_config(slack_id, name)
     enable_repo_feature(slack_id, repo_config, target)
-    message.reply('Enabled [*' + target + '*] on repo ' + name
-                  + '.  Can be disabled using: _disable repo ' + name + ' ' + target + '_')
+    return 'Enabled [*' + target + '*] on repo ' + name\
+           + '.  Can be disabled using: _disable repo ' + name + ' ' + target + '_'
 
 
 @respond_to('username ([\\w-]+)$')
@@ -189,7 +188,7 @@ def set_username(message, username):
     slack_id = get_user_id(message)
     details = _get_user_details(slack_id)
     save_username(slack_id, details, username)
-    message.reply('Github username set as [*' + username + '*].')
+    return 'Github username set as [*' + username + '*].'
 
 
 @respond_to('repos')
@@ -205,7 +204,7 @@ def list_repositories(message):
         reply += '\n' + repo
     reply += '```'
 
-    message.reply('The following repos are being watched:' + reply)
+    return 'The following repos are being watched:' + reply
 
 
 def _get_repo_config(slack_id, name):

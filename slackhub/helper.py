@@ -1,7 +1,3 @@
-import re
-
-from slackbot.bot import respond_to
-
 from slackhub.permissioner import is_admin
 
 """
@@ -9,16 +5,16 @@ Handles help docs for users
 """
 
 
-@respond_to('help', re.IGNORECASE)
+#@respond_to('help', re.IGNORECASE)
 def help_me(message):
     """
     Provide list of available commands
     :param message: message body that holds things like the user and how to reply
     """
     if is_admin(message):
-        message.reply(_admin_commands() + _user_commands())
+        return _admin_commands() + _user_commands()
     else:
-        message.reply(_user_commands())
+        return _user_commands()
 
 
 def _admin_commands():

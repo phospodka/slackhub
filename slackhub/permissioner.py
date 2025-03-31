@@ -22,7 +22,7 @@ def verify_admin(fun):
         if message and is_admin(message):
             return fun(*args, **kwargs)
         else:
-            message.reply('Access denied')
+            return 'Access denied'
     return decorated
 
 
@@ -44,4 +44,5 @@ def get_user_id(message):
     :param message: message body to parse
     :return: user id from the message
     """
-    return message.user['id']
+    #return message.user['id']
+    return message.get('user')
