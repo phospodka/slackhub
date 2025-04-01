@@ -92,6 +92,14 @@ def webhook_sink(token):
     return "OK"
 
 
+@flask.route("/slackhub/oauth", methods=['GET', 'POST'])
+def oauth_redirect_url():
+    """
+    Oauth redirect url
+    """
+    return "OK"
+
+
 # main it up a notch
 if __name__ == '__main__':
     main()
