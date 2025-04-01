@@ -30,7 +30,7 @@ def start():
 @app.message(re.compile('help', re.IGNORECASE))
 def help_message_handler(message, say):
     # say() sends a message to the channel where the event was triggered
-    logger.info('got message')
+    logger.debug('got message')
     response = helper.help_me(message)
     say(response)
 
@@ -38,7 +38,7 @@ def help_message_handler(message, say):
 @app.event("message")
 def direct_message_handler(body, say):
     # say() sends a message to the channel where the event was triggered
-    logger.info('got event message')
+    logger.debug('got event message')
     event = body.get('event')
     say(command_parser(event))
     #say(f"Thanks for messaging me, <@{event['user']}>!")
@@ -47,7 +47,7 @@ def direct_message_handler(body, say):
 @app.event("app_mention")
 def bot_mention_handler(body, say):
     # say() sends a message to the channel where the event was triggered
-    logger.info('got event mention')
+    logger.debug('got event mention')
     event = body.get('event')
     say(command_parser(event))
     #say(f"Thanks for mentioning me, <@{event['user']}>!")
